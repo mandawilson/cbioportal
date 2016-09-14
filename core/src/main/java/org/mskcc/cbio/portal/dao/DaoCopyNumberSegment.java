@@ -58,7 +58,20 @@ public final class DaoCopyNumberSegment {
                     Long.toString(seg.getStart()),
                     Long.toString(seg.getEnd()),
                     Integer.toString(seg.getNumProbes()),
-                    Double.toString(seg.getSegMean())
+                    Double.toString(seg.getSegMean()),
+                    Integer.toString(seg.getSeg()),
+                    Integer.toString(seg.getNHet()),
+                    Double.toString(seg.getCnlrMedian()),
+                    Double.toString(seg.getMafR()),
+                    Integer.toString(seg.getSegCluster()),
+                    Double.toString(seg.getCnlrMedianCluster()),
+                    Double.toString(seg.getMafRCluster()),
+                    Double.toString(seg.getCellularFraction()),
+                    Integer.toString(seg.getTotalCopyNumber()),
+                    Integer.toString(seg.getMinorCopyNumber()),
+                    Double.toString(seg.getCellularFractionEm()),
+                    Integer.toString(seg.getTotalCopyNumberEm()),
+                    Integer.toString(seg.getMinorCopyNumberEm())
             );
             return 1;
         }
@@ -114,6 +127,19 @@ public final class DaoCopyNumberSegment {
                         rs.getInt("NUM_PROBES"),
                         rs.getDouble("SEGMENT_MEAN"));
                 seg.setSegId(rs.getLong("SEG_ID"));
+                seg.setSeg(rs.getInt("SEG"));
+                seg.setNHet(rs.getInt("N_HET"));
+                seg.setCnlrMedian(rs.getDouble("CNLR_MEDIAN"));
+                seg.setMafR(rs.getDouble("MAF_R"));
+                seg.setSegCluster(rs.getInt("SEG_CLUST"));
+                seg.setCnlrMedianCluster(rs.getDouble("CNLR_MEDIAN_CLUST"));
+                seg.setMafRCluster(rs.getDouble("MAF_R_CLUST"));
+                seg.setCellularFraction(rs.getDouble("CELLULAR_FRACTION"));
+                seg.setTotalCopyNumber(rs.getInt("TOTAL_COPY_NUMBER"));
+                seg.setMinorCopyNumber(rs.getInt("MINOR_COPY_NUMBER"));
+                seg.setCellularFractionEm(rs.getDouble("CELLULAR_FRACTION_EM"));
+                seg.setTotalCopyNumberEm(rs.getInt("TOTAL_COPY_NUMBER_EM"));
+                seg.setMinorCopyNumberEm(rs.getInt("MINOR_COPY_NUMBER_EM"));
                 segs.add(seg);
             }
             return segs;

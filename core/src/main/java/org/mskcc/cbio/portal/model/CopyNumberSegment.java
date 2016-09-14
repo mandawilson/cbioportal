@@ -45,6 +45,19 @@ public class CopyNumberSegment {
     private long end;
     private int numProbes;
     private double segMean;
+    private int seg;
+    private int nHet;
+    private double cnlrMedian;
+    private double mafR;
+    private int segCluster;
+    private double cnlrMedianCluster;
+    private double mafRCluster;
+    private double cellularFraction;
+    private int totalCopyNumber;
+    private int minorCopyNumber;
+    private double cellularFractionEm;
+    private int totalCopyNumberEm;
+    private int minorCopyNumberEm;
 
     public CopyNumberSegment(int cancerStudyId, int sampleId, String chr,
             long start, long end, int numProbes, double segMean) {
@@ -119,5 +132,109 @@ public class CopyNumberSegment {
 
     public void setStart(long start) {
         this.start = start;
+    }
+
+    public int getSeg() {
+        return seg;
+    }
+
+    public void setSeg(int seg) {
+        this.seg = seg;
+    }
+
+    public int getNHet() {
+        return nHet;
+    }
+
+    public void setNHet(int nHet) {
+        this.nHet = nHet;
+    }
+
+    public double getCnlrMedian() {
+        return cnlrMedian;
+    }
+
+    public void setCnlrMedian(double cnlrMedian) {
+        this.cnlrMedian = cnlrMedian;
+    }
+
+    public double getMafR() {
+        return mafR;
+    }
+
+    public void setMafR(double mafR) {
+        this.mafR = mafR;
+    }
+
+    public int getSegCluster() {
+        return segCluster;
+    }
+
+    public void setSegCluster(int segCluster) {
+        this.segCluster = segCluster;
+    }
+
+    public double getCnlrMedianCluster() {
+        return cnlrMedianCluster;
+    }
+
+    public void setCnlrMedianCluster(double cnlrMedianCluster) {
+        this.cnlrMedianCluster = cnlrMedianCluster;
+    }
+
+    public double getMafRCluster() {
+        return mafRCluster;
+    }
+
+    public void setMafRCluster(double mafRCluster) {
+        this.mafRCluster = mafRCluster;
+    }
+
+    public double getCellularFraction() {
+        return cellularFraction;
+    }
+
+    public void setCellularFraction(double cellularFraction) {
+        this.cellularFraction = cellularFraction;
+    }
+
+    public int getTotalCopyNumber() {
+        return totalCopyNumber;
+    }
+
+    public void setTotalCopyNumber(int totalCopyNumber) {
+        this.totalCopyNumber = totalCopyNumber;
+    }
+
+    public int getMinorCopyNumber() {
+        return minorCopyNumber;
+    }
+
+    public void setMinorCopyNumber(int minorCopyNumber) {
+        this.minorCopyNumber = minorCopyNumber;
+    }
+
+    public double getCellularFractionEm() {
+        return cellularFractionEm;
+    }
+
+    public void setCellularFractionEm(double cellularFractionEm) {
+        this.cellularFractionEm = cellularFractionEm;
+    }
+
+    public int getTotalCopyNumberEm() {
+        return totalCopyNumberEm;
+    }
+
+    public void setTotalCopyNumberEm(int totalCopyNumberEm) {
+        this.totalCopyNumberEm = totalCopyNumberEm;
+    }
+
+    public int getMinorCopyNumberEm() {
+        return minorCopyNumberEm;
+    }
+
+    public void setMinorCopyNumberEm(int minorCopyNumberEm) {
+        this.minorCopyNumberEm = minorCopyNumberEm;
     }
 }

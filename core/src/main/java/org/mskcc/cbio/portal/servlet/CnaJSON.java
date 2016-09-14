@@ -440,6 +440,19 @@ public class CnaJSON extends HttpServlet {
         row.add(seg.getEnd());
         row.add(seg.getNumProbes());
         row.add(seg.getSegMean());
+        row.add(seg.getSeg());
+        row.add(seg.getNHet());
+        row.add(seg.getCnlrMedian());
+        row.add(seg.getMafR());
+        row.add(seg.getSegCluster());
+        row.add(seg.getCnlrMedianCluster());
+        row.add(seg.getMafRCluster());
+        row.add(seg.getCellularFraction());
+        row.add(seg.getTotalCopyNumber());
+        row.add(seg.getMinorCopyNumber());
+        row.add(seg.getCellularFractionEm());
+        row.add(seg.getTotalCopyNumberEm());
+        row.add(seg.getMinorCopyNumberEm());
         list.add(row);
     }
     
