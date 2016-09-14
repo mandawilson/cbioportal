@@ -196,6 +196,57 @@ public class MutationModelConverter {
         if (mutation.getNormalRefCount() != null) {
             extendedMutation.setNormalRefCount(mutation.getNormalRefCount());
         }
+		if (mutation.getDipLogR() != null) {
+			extendedMutation.setDipLogR(mutation.getDipLogR());
+		}
+		if (mutation.getSegMean() != null) {
+			extendedMutation.setSegMean(mutation.getSegMean());
+		}
+		if (mutation.getCellularFraction() != null) {
+			extendedMutation.setCellularFraction(mutation.getCellularFraction());
+		}
+		if (mutation.getTotalCopyNumber() != null) {
+			extendedMutation.setTotalCopyNumber(mutation.getTotalCopyNumber());
+		}
+		if (mutation.getMinorCopyNumber() != null) {
+			extendedMutation.setMinorCopyNumber(mutation.getMinorCopyNumber());
+		}
+		if (mutation.getPurity() != null) {
+			extendedMutation.setPurity(mutation.getPurity());
+		}
+		if (mutation.getPloidy() != null) {
+			extendedMutation.setPloidy(mutation.getPloidy());
+		}
+		if (mutation.getCcfMCopies() != null) {
+			extendedMutation.setCcfMCopies(mutation.getCcfMCopies());
+		}
+		if (mutation.getCcfMCopiesLower() != null) {
+			extendedMutation.setCcfMCopiesLower(mutation.getCcfMCopiesLower());
+		}
+		if (mutation.getCcfMCopiesUpper() != null) {
+			extendedMutation.setCcfMCopiesUpper(mutation.getCcfMCopiesUpper());
+		}
+		if (mutation.getCcfMCopiesProb95() != null) {
+			extendedMutation.setCcfMCopiesProb95(mutation.getCcfMCopiesProb95());
+		}
+		if (mutation.getCcfMCopiesProb90() != null) {
+			extendedMutation.setCcfMCopiesProb90(mutation.getCcfMCopiesProb90());
+		}
+		if (mutation.getCcf1Copy() != null) {
+			extendedMutation.setCcf1Copy(mutation.getCcf1Copy());
+		}
+		if (mutation.getCcf1CopyLower() != null) {
+			extendedMutation.setCcf1CopyLower(mutation.getCcf1CopyLower());
+		}
+		if (mutation.getCcf1CopyUpper() != null) {
+			extendedMutation.setCcf1CopyUpper(mutation.getCcf1CopyUpper());
+		}
+		if (mutation.getCcf1CopyProb95() != null) {
+			extendedMutation.setCcf1CopyProb95(mutation.getCcf1CopyProb95());
+		}
+		if (mutation.getCcf1CopyProb90() != null) {
+			extendedMutation.setCcf1CopyProb90(mutation.getCcf1CopyProb90());
+		}
 
         return extendedMutation;
     }

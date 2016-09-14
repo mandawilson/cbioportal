@@ -51,6 +51,7 @@
                         <th class="mut-header" alt="Variant allele frequency in the normal sample"><b>Allele<br/>Freq (N)</b></th>
                         <th class="mut-header" alt="Variant allele read count in the normal sample"><b>Variant<br/>Reads (N)</b></th>
                         <th class="mut-header" alt="Reference allele read count in the normal sample"><b>Ref<br/>Reads (N)</b></th>
+                        <th class="mut-header" alt="Cellular Fraction"><b>CF</b></th>
                         <th class="mut-header" alt="Load BAM for this mutation via IGV"><b>BAM</b></th>
                         <th class="mut-header" alt="Copy-number status of the mutated gene"><b>Copy #</b></th>
                         <th class="mut-header" alt="Percentile of mRNA expression of the mutated gene in this tumor comparing to the cohort"><b>mRNA Expr.</b></th>
@@ -59,5 +60,21 @@
                         <th class="mut-header" alt="COSMIC occurrences"><b>COSMIC</b></th>
                         <th class="mut-header" alt="Functional Impact predicted by MutationAssessor (missense mutations only)"><b>Mutation<br/>Assessor</b></th>
                         <th class="mut-header" alt="Potential Drugs"><b>Drugs</b></th>
+                        <th class="mut-header" alt="Dip Log R"><b>Dip Log R</b></th>
+                        <th class="mut-header" alt="Seg Mean"><b>Seg Mean</b></th>
+                        <th class="mut-header" alt="Total Copy Number"><b>Total Copy #</b></th>
+                        <th class="mut-header" alt="Minor Copy Number"><b>Minor Copy #</b></th>
+                        <th class="mut-header" alt="Purity"><b>Purity</b></th>
+                        <th class="mut-header" alt="Ploidy"><b>Ploidy</b></th>
+                        <th class="mut-header" alt="CCF M Copies"><b>CCF M Copies</b></th>
+                        <th class="mut-header" alt="CCF M Copies Lower"><b>CCF M Copies Lower</b></th>
+                        <th class="mut-header" alt="CCF M Copies Upper"><b>CCF M Copies Upper</b></th>
+                        <th class="mut-header" alt="CCF M Copies Prob 95"><b>CCF M Copies Prob 95</b></th>
+                        <th class="mut-header" alt="CCF M Copies Prob 90"><b>CCF M Copies Prob 90</b></th>
+                        <th class="mut-header" alt="CCF 1 Copy"><b>CCF 1 Copy</b></th>
+                        <th class="mut-header" alt="CCF 1 Copy Lower"><b>CCF 1 Copy Lower</b></th>
+                        <th class="mut-header" alt="CCF 1 Copy Upper"><b>CCF 1 Copy Upper</b></th>
+                        <th class="mut-header" alt="CCF 1 Copy Prob 95"><b>CCF 1 Copy Prob 95</b></th>
+                        <th class="mut-header" alt="CCF 1 Copy Prob 90"><b>CCF 1 Copy Prob 90</b></th>
                     </tr>
                 </thead>

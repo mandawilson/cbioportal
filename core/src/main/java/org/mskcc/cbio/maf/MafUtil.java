@@ -145,6 +145,24 @@ public class MafUtil
 	public static final String MA_LINK_PDB = "MA:link.PDB";
 	public static final String MA_PROTEIN_CHANGE = "MA:protein.change";
 
+	// FACETS column names
+	public static final String DIP_LOG_R = "dipLogR";
+	public static final String SEG_MEAN = "seg.mean";
+	public static final String CELLULAR_FRACTION = "cf";
+	public static final String TOTAL_COPY_NUMBER = "tcn";
+	public static final String MINOR_COPY_NUMBER = "lcn";
+	public static final String PURITY = "purity";
+	public static final String PLOIDY = "ploidy";
+	public static final String CCF_M_COPIES = "ccf_Mcopies";
+	public static final String CCF_M_COPIES_LOWER = "ccf_Mcopies_lower";
+	public static final String CCF_M_COPIES_UPPER = "ccf_Mcopies_upper";
+	public static final String CCF_M_COPIES_PROB_95 = "ccf_Mcopies_prob95";
+	public static final String CCF_M_COPIES_PROB_90 = "ccf_Mcopies_prob90";
+	public static final String CCF_1_COPY = "ccf_1copy";
+	public static final String CCF_1_COPY_LOWER = "ccf_1copy_lower";
+	public static final String CCF_1_COPY_UPPER = "ccf_1copy_upper";
+	public static final String CCF_1_COPY_PROB_95 = "ccf_1copy_prob95";
+	public static final String CCF_1_COPY_PROB_90 = "ccf_1copy_prob90";
 
     // standard MAF column indices
 	private int chrIndex = -1; // CHR
@@ -159,7 +177,7 @@ public class MafUtil
     private int centerIndex = -1; // CENTER
     private int strandIndex = -1; // STRAND
     private int tumorSeqAllele1Index = -1; // TUMOR_SEQ_ALLELE1
-    private int tumorSeqAllele2Index = -1; // TUMOR_SEQ_ALLELE1
+    private int tumorSeqAllele2Index = -1; // TUMOR_SEQ_ALLELE2
     private int dbSNPIndex = -1; // DB_SNP_RS
     private int tumorSampleIndex = -1;
     private int mutationStatusIndex = -1; // MUTATION_STATUS
@@ -231,6 +249,25 @@ public class MafUtil
 	private int maLinkMsaIndex = -1; // MA:link.MSA
 	private int maLinkPdbIndex = -1; // MA:link.PDB
 	private int maProteinChangeIndex = -1; // MA:protein.change
+
+	// FACETS column indices
+	private int dipLogRIndex = -1;
+	private int segMeanIndex = -1;
+	private int cellularFractionIndex = -1;
+	private int totalCopyNumberIndex = -1;
+	private int minorCopyNumberIndex = -1;
+	private int purityIndex = -1;
+	private int ploidyIndex = -1;
+	private int ccfMCopiesIndex = -1;
+	private int ccfMCopiesLowerIndex = -1;
+	private int ccfMCopiesUpperIndex = -1;
+	private int ccfMCopiesProb95Index = -1;
+	private int ccfMCopiesProb90Index = -1;
+	private int ccf1CopyIndex = -1;
+	private int ccf1CopyLowerIndex = -1;
+	private int ccf1CopyUpperIndex = -1;
+	private int ccf1CopyProb95Index = -1;
+	private int ccf1CopyProb90Index = -1;
 
 	// number of headers in the header line
     private int headerCount;
@@ -426,7 +463,41 @@ public class MafUtil
                 normalDepthIndex = i;
             } else if(header.equalsIgnoreCase(NORMAL_VAF)) {
                 normalVafIndex = i;
-            }
+            } else if(header.equalsIgnoreCase(DIP_LOG_R)) {
+				dipLogRIndex = i;
+            } else if(header.equalsIgnoreCase(SEG_MEAN)) {
+				segMeanIndex = i;
+            } else if(header.equalsIgnoreCase(CELLULAR_FRACTION)) {
+				cellularFractionIndex = i;
+            } else if(header.equalsIgnoreCase(TOTAL_COPY_NUMBER)) {
+				totalCopyNumberIndex = i;
+            } else if(header.equalsIgnoreCase(MINOR_COPY_NUMBER)) {
+				minorCopyNumberIndex = i;
+            } else if(header.equalsIgnoreCase(PURITY)) {
+				purityIndex = i;
+            } else if(header.equalsIgnoreCase(PLOIDY)) {
+				ploidyIndex = i;
+            } else if(header.equalsIgnoreCase(CCF_M_COPIES)) {
+				ccfMCopiesIndex = i;
+            } else if(header.equalsIgnoreCase(CCF_M_COPIES_LOWER)) {
+				ccfMCopiesLowerIndex = i;
+            } else if(header.equalsIgnoreCase(CCF_M_COPIES_UPPER)) {
+				ccfMCopiesUpperIndex = i;
+            } else if(header.equalsIgnoreCase(CCF_M_COPIES_PROB_95)) {
+				ccfMCopiesProb95Index = i;
+            } else if(header.equalsIgnoreCase(CCF_M_COPIES_PROB_90)) {
+				ccfMCopiesProb90Index = i;
+            } else if(header.equalsIgnoreCase(CCF_1_COPY)) {
+				ccf1CopyIndex = i;
+            } else if(header.equalsIgnoreCase(CCF_1_COPY_LOWER)) {
+				ccf1CopyLowerIndex = i;
+            } else if(header.equalsIgnoreCase(CCF_1_COPY_UPPER)) {
+				ccf1CopyUpperIndex = i;
+            } else if(header.equalsIgnoreCase(CCF_1_COPY_PROB_95)) {
+				ccf1CopyProb95Index = i;
+            } else if(header.equalsIgnoreCase(CCF_1_COPY_PROB_90)) {
+				ccf1CopyProb90Index = i;
+			}
         }
     }
 
@@ -533,6 +604,26 @@ public class MafUtil
 	    record.setOncotatorExonAffectedBestEffect(TabDelimitedFileUtil.getPartInt(oncoExonAffectedBeIndex, parts));
 	    record.setOncotatorProteinPosStartBestEffect(TabDelimitedFileUtil.getPartInt(oncoProteinPosStartBeIndex, parts));
 	    record.setOncotatorProteinPosEndBestEffect(TabDelimitedFileUtil.getPartInt(oncoProteinPosEndBeIndex, parts));
+
+		// FACETS columns
+		// not using TabDelimitedFileUtil.getPartFloat, -1 may not be a safe value for some FACETS float fields
+		record.setDipLogR(TabDelimitedFileUtil.getPartFloat2(dipLogRIndex, parts));
+		record.setSegMean(TabDelimitedFileUtil.getPartFloat2(segMeanIndex, parts));
+		record.setCellularFraction(TabDelimitedFileUtil.getPartFloat2(cellularFractionIndex, parts));
+		record.setTotalCopyNumber(TabDelimitedFileUtil.getPartInt(totalCopyNumberIndex, parts));
+		record.setMinorCopyNumber(TabDelimitedFileUtil.getPartInt(minorCopyNumberIndex, parts));
+		record.setPurity(TabDelimitedFileUtil.getPartFloat2(purityIndex, parts));
+		record.setPloidy(TabDelimitedFileUtil.getPartFloat2(ploidyIndex, parts));
+		record.setCcfMCopies(TabDelimitedFileUtil.getPartFloat2(ccfMCopiesIndex, parts));
+		record.setCcfMCopiesLower(TabDelimitedFileUtil.getPartFloat2(ccfMCopiesLowerIndex, parts));
+		record.setCcfMCopiesUpper(TabDelimitedFileUtil.getPartFloat2(ccfMCopiesUpperIndex, parts));
+		record.setCcfMCopiesProb95(TabDelimitedFileUtil.getPartFloat2(ccfMCopiesProb95Index, parts));
+		record.setCcfMCopiesProb90(TabDelimitedFileUtil.getPartFloat2(ccfMCopiesProb90Index, parts));
+		record.setCcf1Copy(TabDelimitedFileUtil.getPartFloat2(ccf1CopyIndex, parts));
+		record.setCcf1CopyLower(TabDelimitedFileUtil.getPartFloat2(ccf1CopyLowerIndex, parts));
+		record.setCcf1CopyUpper(TabDelimitedFileUtil.getPartFloat2(ccf1CopyUpperIndex, parts));
+		record.setCcf1CopyProb95(TabDelimitedFileUtil.getPartFloat2(ccf1CopyProb95Index, parts));
+		record.setCcf1CopyProb90(TabDelimitedFileUtil.getPartFloat2(ccf1CopyProb90Index, parts));
             
             fixEndPointForInsertion(record);
             
@@ -858,6 +949,91 @@ public class MafUtil
 	public int getOncoProteinPosEndBeIndex()
 	{
 		return oncoProteinPosEndBeIndex;
+	}
+
+	public int getDipLogRIndex()
+	{
+		return dipLogRIndex;
+	}
+
+	public int getSegMeanIndex()
+	{
+		return segMeanIndex;
+	}
+
+	public int getCellularFractionIndex()
+	{
+		return cellularFractionIndex;
+	}
+
+	public int getTotalCopyNumberIndex()
+	{
+		return totalCopyNumberIndex;
+	}
+
+	public int getMinorCopyNumberIndex()
+	{
+		return minorCopyNumberIndex;
+	}
+
+	public int getPurityIndex()
+	{
+		return purityIndex;
+	}
+
+	public int getPloidyIndex()
+	{
+		return ploidyIndex;
+	}
+
+	public int getCcfMCopiesIndex()
+	{
+		return ccfMCopiesIndex;
+	}
+
+	public int getCcfMCopiesLowerIndex()
+	{
+		return ccfMCopiesLowerIndex;
+	}
+
+	public int getCcfMCopiesUpperIndex()
+	{
+		return ccfMCopiesUpperIndex;
+	}
+
+	public int getCcfMCopiesProb95Index()
+	{
+		return ccfMCopiesProb95Index;
+	}
+
+	public int getCcfMCopiesProb90Index()
+	{
+		return ccfMCopiesProb90Index;
+	}
+
+	public int getCcf1CopyIndex()
+	{
+		return ccf1CopyIndex;
+	}
+
+	public int getCcf1CopyLowerIndex()
+	{
+		return ccf1CopyLowerIndex;
+	}
+
+	public int getCcf1CopyUpperIndex()
+	{
+		return ccf1CopyUpperIndex;
+	}
+
+	public int getCcf1CopyProb95Index()
+	{
+		return ccf1CopyProb95Index;
+	}
+
+	public int getCcf1CopyProb90Index()
+	{
+		return ccf1CopyProb90Index;
 	}
 
 	public int getColumnIndex(String colName)
