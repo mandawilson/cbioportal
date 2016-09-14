@@ -206,7 +206,24 @@ public class GetMutationData {
 	                buf.append(getAlleleCount(mutation.getTumorAltCount())).append(TAB);
 	                buf.append(getAlleleCount(mutation.getNormalRefCount())).append(TAB);
 	                buf.append(getAlleleCount(mutation.getNormalAltCount())).append(TAB);
-                    buf.append(geneticProfileId);
+                    buf.append(geneticProfileId).append(TAB);
+					buf.append(mutation.getDipLogR());
+					buf.append(mutation.getSegMean());
+					buf.append(mutation.getCellularFraction());
+					buf.append(mutation.getTotalCopyNumber());
+					buf.append(mutation.getMinorCopyNumber());
+					buf.append(mutation.getPurity());
+					buf.append(mutation.getPloidy());
+					buf.append(mutation.getCcfMCopies());
+					buf.append(mutation.getCcfMCopiesLower());
+					buf.append(mutation.getCcfMCopiesUpper());
+					buf.append(mutation.getCcfMCopiesProb95());
+					buf.append(mutation.getCcfMCopiesProb90());
+					buf.append(mutation.getCcf1Copy());
+					buf.append(mutation.getCcf1CopyLower());
+					buf.append(mutation.getCcf1CopyUpper());
+					buf.append(mutation.getCcf1CopyProb95());
+					buf.append(mutation.getCcf1CopyProb90());
                     buf.append("\n");
                 }
             }
@@ -252,7 +269,24 @@ public class GetMutationData {
 		buf.append("variant_read_count_tumor").append(TAB);
 		buf.append("reference_read_count_normal").append(TAB);
 		buf.append("variant_read_count_normal").append(TAB);
-		buf.append("genetic_profile_id");
+		buf.append("genetic_profile_id").append(TAB);
+		buf.append("dip_log_r").append(TAB);
+		buf.append("seg_mean").append(TAB);
+		buf.append("cellular_fraction").append(TAB);
+		buf.append("total_copy_number").append(TAB);
+		buf.append("minor_copy_number").append(TAB);
+		buf.append("purity").append(TAB);
+		buf.append("ploidy").append(TAB);
+		buf.append("ccf_m_copies").append(TAB);
+		buf.append("ccf_m_copies_lower").append(TAB);
+		buf.append("ccf_m_copies_upper").append(TAB);
+		buf.append("ccf_m_copies_prob95").append(TAB);
+		buf.append("ccf_m_copies_prob90").append(TAB);
+		buf.append("ccf_1_copy").append(TAB);
+		buf.append("ccf_1_copy_lower").append(TAB);
+		buf.append("ccf_1_copy_upper").append(TAB);
+		buf.append("ccf_1_copy_prob95").append(TAB);
+		buf.append("ccf_1_copy_prob90");
 
 		return buf.toString();
 	}

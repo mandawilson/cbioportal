@@ -218,6 +218,25 @@ public class ImportExtendedMutationData{
 				int proteinPosStart,
 					proteinPosEnd;
 
+				// FACETS
+				int totalCopyNumber,
+					minorCopyNumber;
+				float dipLogR,
+					segMean,
+					cellularFraction,
+					purity,
+					ploidy,
+					ccfMCopies,
+					ccfMCopiesLower,
+					ccfMCopiesUpper,
+					ccfMCopiesProb95,
+					ccfMCopiesProb90,
+					ccf1Copy,
+					ccf1CopyLower,
+					ccf1CopyUpper,
+					ccf1CopyProb95,
+					ccf1CopyProb90;
+
 				// determine whether to use canonical or best effect transcript
 
 				// try canonical first
@@ -250,6 +269,25 @@ public class ImportExtendedMutationData{
 						record.getProteinPosition(), proteinChange);
 				proteinPosEnd = ExtendedMutationUtil.getProteinPosEnd(
 						record.getProteinPosition(), proteinChange);
+
+				// FACETS
+				dipLogR = record.getDipLogR();
+				segMean = record.getSegMean();
+				cellularFraction = record.getCellularFraction();
+				totalCopyNumber = record.getTotalCopyNumber();
+				minorCopyNumber = record.getMinorCopyNumber();
+				purity = record.getPurity();
+				ploidy = record.getPloidy();
+				ccfMCopies = record.getCcfMCopies();
+				ccfMCopiesLower = record.getCcfMCopiesLower();
+				ccfMCopiesUpper = record.getCcfMCopiesUpper();
+				ccfMCopiesProb95 = record.getCcfMCopiesProb95();
+				ccfMCopiesProb90 = record.getCcfMCopiesProb90();
+				ccf1Copy = record.getCcf1Copy();
+				ccf1CopyLower = record.getCcf1CopyLower();
+				ccf1CopyUpper = record.getCcf1CopyUpper();
+				ccf1CopyProb95 = record.getCcf1CopyProb95();
+				ccf1CopyProb90 = record.getCcf1CopyProb90();
 
                 //  Assume we are dealing with Entrez Gene Ids (this is the best / most stable option)
                 String geneSymbol = record.getHugoGeneSymbol();
@@ -376,6 +414,24 @@ public class ImportExtendedMutationData{
 
 					// TODO we don't use this info right now...
 					mutation.setCanonicalTranscript(true);
+
+					mutation.setDipLogR(dipLogR);
+					mutation.setSegMean(segMean);
+					mutation.setCellularFraction(cellularFraction);
+					mutation.setTotalCopyNumber(totalCopyNumber);
+					mutation.setMinorCopyNumber(minorCopyNumber);
+					mutation.setPurity(purity);
+					mutation.setPloidy(ploidy);
+					mutation.setCcfMCopies(ccfMCopies);
+					mutation.setCcfMCopiesLower(ccfMCopiesLower);
+					mutation.setCcfMCopiesUpper(ccfMCopiesUpper);
+					mutation.setCcfMCopiesProb95(ccfMCopiesProb95);
+					mutation.setCcfMCopiesProb90(ccfMCopiesProb90);
+					mutation.setCcf1Copy(ccf1Copy);
+					mutation.setCcf1CopyLower(ccf1CopyLower);
+					mutation.setCcf1CopyUpper(ccf1CopyUpper);
+					mutation.setCcf1CopyProb95(ccf1CopyProb95);
+					mutation.setCcf1CopyProb90(ccf1CopyProb90);
 
 					sequencedCaseSet.add(sample.getStableId());
 

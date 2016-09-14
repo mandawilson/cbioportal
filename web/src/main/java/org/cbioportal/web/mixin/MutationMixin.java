@@ -36,6 +36,23 @@ public class MutationMixin {
     private Integer variantReadCountNormal;
     private Integer referenceReadCountNormal;
     private String aminoAcidChange;
+	private Float dipLogR;
+	private Float segMean;
+	private Float cellularFraction;
+	private Integer totalCopyNumber;
+	private Integer minorCopyNumber;
+	private Float purity;
+	private Float ploidy;
+	private Float ccfMCopies;
+	private Float ccfMCopiesLower;
+	private Float ccfMCopiesUpper;
+	private Float ccfMCopiesProb95;
+	private Float ccfMCopiesProb90;
+	private Float ccf1Copy;
+	private Float ccf1CopyLower;
+	private Float ccf1CopyUpper;
+	private Float ccf1CopyProb95;
+	private Float ccf1CopyProb90;
 
     @JsonUnwrapped
     private MutationEvent mutationEvent;

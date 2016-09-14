@@ -587,7 +587,7 @@ public class MutationsJSON extends HttpServlet {
         map.put("protein-start", new ArrayList());
         map.put("protein-end", new ArrayList());
         map.put("aa", new ArrayList());
-	map.put("aa-orig", new ArrayList());
+        map.put("aa-orig", new ArrayList());
         map.put("ref", new ArrayList());
         map.put("var", new ArrayList());
         map.put("type", new ArrayList());
@@ -609,6 +609,23 @@ public class MutationsJSON extends HttpServlet {
         map.put("validation", new ArrayList());
         map.put("mycancergenome", new ArrayList());
         map.put("is-hotspot", new ArrayList());
+        map.put("dip-log-r", new ArrayList());
+        map.put("seg-mean", new ArrayList());
+        map.put("cellular-fraction", new ArrayList());
+        map.put("total-copy-number", new ArrayList());
+        map.put("minor-copy-number", new ArrayList());
+        map.put("purity", new ArrayList());
+        map.put("ploidy", new ArrayList());
+        map.put("ccf-m-copies", new ArrayList());
+        map.put("ccf-m-copies-lower", new ArrayList());
+        map.put("ccf-m-copies-upper", new ArrayList());
+        map.put("ccf-m-copies-prob95", new ArrayList());
+        map.put("ccf-m-copies-prob90", new ArrayList());
+        map.put("ccf-1-copy", new ArrayList());
+        map.put("ccf-1-copy-lower", new ArrayList());
+        map.put("ccf-1-copy-upper", new ArrayList());
+        map.put("ccf-1-copy-prob95", new ArrayList());
+        map.put("ccf-1-copy-prob90", new ArrayList());
         
         return map;
     }
@@ -652,7 +669,7 @@ public class MutationsJSON extends HttpServlet {
         data.get("protein-start").add(mutation.getOncotatorProteinPosStart());
         data.get("protein-end").add(mutation.getOncotatorProteinPosEnd());
         data.get("aa").add(mutation.getProteinChange());
-	data.get("aa-orig").add(mutation.getAminoAcidChange());
+        data.get("aa-orig").add(mutation.getAminoAcidChange());
         data.get("ref").add(mutation.getReferenceAllele());
         data.get("var").add(mutation.getTumorSeqAllele());
         data.get("type").add(mutation.getMutationType());
@@ -666,6 +683,25 @@ public class MutationsJSON extends HttpServlet {
         data.get("mrna").add(mrna);
         data.get("mycancergenome").add(mycancergenomelinks);
         data.get("is-hotspot").add(isHotspot);
+		
+		// FACETS
+        data.get("dip-log-r").add(mutation.getDipLogR());
+        data.get("seg-mean").add(mutation.getSegMean());
+        data.get("cellular-fraction").add(mutation.getCellularFraction());
+        data.get("total-copy-number").add(mutation.getTotalCopyNumber());
+        data.get("minor-copy-number").add(mutation.getMinorCopyNumber());
+        data.get("purity").add(mutation.getPurity());
+        data.get("ploidy").add(mutation.getPloidy());
+        data.get("ccf-m-copies").add(mutation.getCcfMCopies());
+        data.get("ccf-m-copies-lower").add(mutation.getCcfMCopiesLower());
+        data.get("ccf-m-copies-upper").add(mutation.getCcfMCopiesUpper());
+        data.get("ccf-m-copies-prob95").add(mutation.getCcfMCopiesProb95());
+        data.get("ccf-m-copies-prob90").add(mutation.getCcfMCopiesProb90());
+        data.get("ccf-1-copy").add(mutation.getCcf1Copy());
+        data.get("ccf-1-copy-lower").add(mutation.getCcf1CopyLower());
+        data.get("ccf-1-copy-upper").add(mutation.getCcf1CopyUpper());
+        data.get("ccf-1-copy-prob95").add(mutation.getCcf1CopyProb95());
+        data.get("ccf-1-copy-prob90").add(mutation.getCcf1CopyProb90());
         
         // cosmic
         data.get("cosmic").add(convertCosmicDataToMatrix(cosmic));

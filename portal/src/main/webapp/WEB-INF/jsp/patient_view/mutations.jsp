@@ -120,6 +120,7 @@
             }
             oncokbInstance.setTumorType(OncoKB.utils.getTumorTypeFromClinicalDataMap(clinicalDataMap));
         }
+		var hasCellularFraction = false;
         for (var i=0, nEvents=mutEventIds.length; i<nEvents; i++) {
             var _id = mutEventIds[i];
             if(oncokbInstance) {
@@ -131,6 +132,10 @@
                     mutations.getValue(_id, "is-hotspot"), mutations.getValue(_id, 'protein-start'), 
                     mutations.getValue(_id, 'protein-end'));
             }
+            var cf = mutations.getValue(_id, 'cellular-fraction');
+			if(cf != null) {
+				hasCellularFraction = true;		
+			}
             data.push([mutEventIds[i]]);
         }
 
@@ -489,6 +494,27 @@
                             }
                         },
                         "asSorting": ["desc", "asc"]
+                    },
+					{// FACETS cellular fraction 
+                        "aTargets": [ mutTableIndices["cellular_fraction"] ],
+						"bVisible": hasCellularFraction,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+						"mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return "<div class='"+table_id+"-cf' alt='"+mutations.getValue(source[0], 'cellular-fraction')+"'></div>";
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'cellular-fraction'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'cellular-fraction'));
+                            }
+                        }
+
                     },
                     {// tumor read count frequency
                         "aTargets": [ mutTableIndices["tumor_var_reads"] ],
@@ -909,6 +935,326 @@
                             }
                         },
                         "asSorting": ["desc", "asc"]
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["dip_log_r"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'dip-log-r'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'dip-log-r'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'dip-log-r'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["seg_mean"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'seg-mean'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'seg-mean'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'seg-mean'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["total_copy_number"] ],
+                        "bVisible": true,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'total-copy-number'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'total-copy-number'));
+                            } else if (type==='type') {
+                                return 0.0; 
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'total-copy-number'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["minor_copy_number"] ],
+                        "bVisible": true,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'minor-copy-number'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'minor-copy-number'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'minor-copy-number'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["purity"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'purity'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'purity'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'purity'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ploidy"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ploidy'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ploidy'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ploidy'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_lower"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-lower'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-lower'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-lower'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_upper"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-upper'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-upper'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-upper'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_prob95"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob95'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob95'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob95'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_prob90"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob90'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob90'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob90'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_lower"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-lower'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-lower'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-lower'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_upper"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-upper'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-upper'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-upper'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_prob95"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob95'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob95'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob95'));
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_prob90"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob90'));
+                            } else if (type==='sort') {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob90'));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob90'));
+                            }
+                        }
                     }
                 ],
                 "fnDrawCallback": function( oSettings ) {
@@ -919,6 +1265,7 @@
                     }
                     plotMrna("."+table_id+"-mrna",mutations);
                     plotMutRate("."+table_id+"-mut-cohort",mutations);
+                    plotCF("."+table_id+"-cf");
                     addNoteTooltip("."+table_id+"-tip");
                     addNoteTooltip("."+table_id+"-ma-tip",null,{my:'top right',at:'bottom center',viewport: $(window)});
                     if(showHotspot) {
@@ -1050,6 +1397,59 @@
                 d3CircledChar(circle,"M","#55C","#66C");
                 qtip($(circle), tip);
             }
+
+        });
+
+        function qtip(el, tip) {
+            $(el).qtip({
+                content: {text: tip},
+	            show: {event: "mouseover"},
+                hide: {fixed: true, delay: 200, event: "mouseout"},
+                style: { classes: 'qtip-light qtip-rounded' },
+                position: {my:'top right',at:'bottom center',viewport: $(window)}
+            });
+        }
+    }
+
+	function valueOrNA(value) {
+		if (value == -1 || value == <%= Float.MIN_VALUE %>) {
+			return "NA"
+		}
+		return value;
+	}
+
+    function plotCF(div) {
+        $(div).each(function() {
+            if (!$(this).is(":empty")) return; // if not empty do not modify
+            var fraction = $(this).attr("alt");
+
+			if (fraction == <%= Float.MIN_VALUE%>) {
+				$(this).text("NA");
+				return;
+			}
+
+            var keyperc = 100 * fraction;
+
+            var data = [keyperc, 100-keyperc];
+            var colors = ["blue", "#ccc"];
+
+            var svg = d3.select($(this)[0])
+                .append("svg")
+                .attr("width", 86)
+                .attr("height", 12);
+
+            var percg = svg.append("g");
+            percg.append("text")
+                    .attr('x',70)
+                    .attr('y',11)
+                    .attr("text-anchor", "end")
+                    .attr('font-size',10)
+                    .text(keyperc.toFixed(1)+"%");
+
+            var gSvg = percg.append("g");
+            var pie = d3AccBar(gSvg, data, 30, colors);
+            var tip = fraction;
+            qtip($(percg), tip);
 
         });
 
