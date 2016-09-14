@@ -660,6 +660,19 @@ CREATE TABLE `copy_number_seg` (
   `END` int(11) NOT NULL,
   `NUM_PROBES` int(11) NOT NULL,
   `SEGMENT_MEAN` double NOT NULL,
+  `SEG1` int(6);
+  `N_HET` int(6);
+  `CNLR_MEDIAN` double;
+  `MAF_R` double;
+  `SEG_CLUST` int(6);
+  `CNLR_MEDIAN_CLUST` double;
+  `MAF_R_CLUST` double;
+  `CELLULAR_FRACTION` double;
+  `TOTAL_COPY_NUMBER` int(6);
+  `MINOR_COPY_NUMBER` int(6);
+  `CELLULAR_FRACTION_EM` double;
+  `TOTAL_COPY_NUMBER_EM` int(6);
+  `MINOR_COPY_NUMBER_EM` int(6);
   KEY (`CANCER_STUDY_ID`,`SAMPLE_ID`),
   PRIMARY KEY (`SEG_ID`),
   FOREIGN KEY (`CANCER_STUDY_ID`) REFERENCES `cancer_study` (`CANCER_STUDY_ID`) ON DELETE CASCADE,
