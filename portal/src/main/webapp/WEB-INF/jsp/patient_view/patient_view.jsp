@@ -353,10 +353,11 @@ var darwinAccessUrl = '<%=darwinAccessURL%>';
 var mutTableIndices =
 		["id","case_ids","gene","aa", "annotation", "chr","start","end","ref","_var","validation","type",
 		 "tumor_freq","tumor_var_reads","tumor_ref_reads","norm_freq","norm_var_reads",
-		 "norm_ref_reads","cellular_fraction","bam","cna","mrna","altrate","pancan_mutations",
-		 "cosmic","ma","drug","dip_log_r","seg_mean","total_copy_number","minor_copy_number",
-		 "purity","ploidy","ccf_m_copies","ccf_m_copies_lower","ccf_m_copies_upper","ccf_m_copies_prob95","ccf_m_copies_prob90",
-		 "ccf_1_copy","ccf_1_copy_lower","ccf_1_copy_upper","ccf_1_copy_prob95","ccf_1_copy_prob90"];
+		 "norm_ref_reads","ccf_m_copies","ccf_m_copies_lower","ccf_m_copies_upper","ccf_m_copies_prob95","ccf_m_copies_prob90",
+		 "ccf_1_copy","ccf_1_copy_lower","ccf_1_copy_upper","ccf_1_copy_prob95","ccf_1_copy_prob90","cellular_fraction",
+		 "bam","cna","facets_copy_number","total_copy_number","minor_copy_number","mrna","altrate",
+		 "pancan_mutations","cosmic","ma","drug","dip_log_r","seg_mean",
+		 "purity","ploidy"];
 mutTableIndices = cbio.util.arrayToAssociatedArrayIndices(mutTableIndices);
 
 $(document).ready(function(){

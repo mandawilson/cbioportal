@@ -195,7 +195,7 @@ public class MutationModelConverter {
         }
         if (mutation.getNormalRefCount() != null) {
             extendedMutation.setNormalRefCount(mutation.getNormalRefCount());
-        }
+		}
 		if (mutation.getDipLogR() != null) {
 			extendedMutation.setDipLogR(mutation.getDipLogR());
 		}

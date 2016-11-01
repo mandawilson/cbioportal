@@ -630,10 +630,20 @@ public class MutationsJSON extends HttpServlet {
         return map;
     }
     
-    private Map<String,Integer> addReadCountMap(Map<String,Integer> map, String sampleId, int readCount) {
-        if (readCount>=0) {
-            map.put(sampleId, readCount);
+    private Map<String,Integer> addSampleCountMap(Map<String,Integer> map, String sampleId, int num) {
+        if (num>=0) {
+            map.put(sampleId, num);
         }
+        return map;
+    }
+
+    private Map<String,Float> addSampleFloatMap(Map<String,Float> map, String sampleId, float num) {	
+        map.put(sampleId, num);
+        return map;
+    }
+
+    private Map<String,Integer> addSampleIntegerMap(Map<String,Integer> map, String sampleId, int num) {	
+        map.put(sampleId, num);
         return map;
     }
     
@@ -646,10 +656,24 @@ public class MutationsJSON extends HttpServlet {
         Integer ix = mapMutationEventIndex.get(eventId);
         if (ix!=null) { // multiple samples
             List.class.cast(data.get("caseIds").get(ix)).add(DaoSample.getSampleById(mutation.getSampleId()).getStableId());
-            addReadCountMap(Map.class.cast(data.get("alt-count").get(ix)),sample.getStableId(), mutation.getTumorAltCount());
-            addReadCountMap(Map.class.cast(data.get("ref-count").get(ix)),sample.getStableId(), mutation.getTumorRefCount());
-            addReadCountMap(Map.class.cast(data.get("normal-alt-count").get(ix)),sample.getStableId(), mutation.getNormalAltCount());
-            addReadCountMap(Map.class.cast(data.get("normal-ref-count").get(ix)),sample.getStableId(), mutation.getNormalRefCount());
+            addSampleCountMap(Map.class.cast(data.get("alt-count").get(ix)),sample.getStableId(), mutation.getTumorAltCount());
+            addSampleCountMap(Map.class.cast(data.get("ref-count").get(ix)),sample.getStableId(), mutation.getTumorRefCount());
+            addSampleCountMap(Map.class.cast(data.get("normal-alt-count").get(ix)),sample.getStableId(), mutation.getNormalAltCount());
+            addSampleCountMap(Map.class.cast(data.get("normal-ref-count").get(ix)),sample.getStableId(), mutation.getNormalRefCount());
+			addSampleFloatMap(Map.class.cast(data.get("seg-mean").get(ix)),sample.getStableId(),mutation.getSegMean());
+        	addSampleFloatMap(Map.class.cast(data.get("cellular-fraction").get(ix)),sample.getStableId(),mutation.getCellularFraction());
+        	addSampleIntegerMap(Map.class.cast(data.get("total-copy-number").get(ix)),sample.getStableId(),mutation.getTotalCopyNumber());
+        	addSampleIntegerMap(Map.class.cast(data.get("minor-copy-number").get(ix)),sample.getStableId(),mutation.getMinorCopyNumber());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-m-copies").get(ix)),sample.getStableId(),mutation.getCcfMCopies());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-m-copies-lower").get(ix)),sample.getStableId(),mutation.getCcfMCopiesLower());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-m-copies-upper").get(ix)),sample.getStableId(),mutation.getCcfMCopiesUpper());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-m-copies-prob95").get(ix)),sample.getStableId(),mutation.getCcfMCopiesProb95());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-m-copies-prob90").get(ix)),sample.getStableId(),mutation.getCcfMCopiesProb90());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-1-copy").get(ix)),sample.getStableId(),mutation.getCcf1Copy());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-1-copy-lower").get(ix)),sample.getStableId(),mutation.getCcf1CopyLower());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-1-copy-upper").get(ix)),sample.getStableId(),mutation.getCcf1CopyUpper());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-1-copy-prob95").get(ix)),sample.getStableId(),mutation.getCcf1CopyProb95());
+        	addSampleFloatMap(Map.class.cast(data.get("ccf-1-copy-prob90").get(ix)),sample.getStableId(),mutation.getCcf1CopyProb90());
             return;
         }
         
@@ -674,10 +698,10 @@ public class MutationsJSON extends HttpServlet {
         data.get("var").add(mutation.getTumorSeqAllele());
         data.get("type").add(mutation.getMutationType());
         data.get("status").add(mutation.getMutationStatus());
-        data.get("alt-count").add(addReadCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getTumorAltCount()));
-        data.get("ref-count").add(addReadCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getTumorRefCount()));
-        data.get("normal-alt-count").add(addReadCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getNormalAltCount()));
-        data.get("normal-ref-count").add(addReadCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getNormalRefCount()));
+        data.get("alt-count").add(addSampleCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getTumorAltCount()));
+        data.get("ref-count").add(addSampleCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getTumorRefCount()));
+        data.get("normal-alt-count").add(addSampleCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getNormalAltCount()));
+        data.get("normal-ref-count").add(addSampleCountMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getNormalRefCount()));
         data.get("validation").add(mutation.getValidationStatus());
         data.get("cna").add(cna);
         data.get("mrna").add(mrna);
@@ -686,22 +710,22 @@ public class MutationsJSON extends HttpServlet {
 		
 		// FACETS
         data.get("dip-log-r").add(mutation.getDipLogR());
-        data.get("seg-mean").add(mutation.getSegMean());
-        data.get("cellular-fraction").add(mutation.getCellularFraction());
-        data.get("total-copy-number").add(mutation.getTotalCopyNumber());
-        data.get("minor-copy-number").add(mutation.getMinorCopyNumber());
+        data.get("seg-mean").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getSegMean()));
+        data.get("cellular-fraction").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCellularFraction()));
+        data.get("total-copy-number").add(addSampleIntegerMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getTotalCopyNumber()));
+        data.get("minor-copy-number").add(addSampleIntegerMap(new HashMap<String,Integer>(),sample.getStableId(),mutation.getMinorCopyNumber()));
         data.get("purity").add(mutation.getPurity());
         data.get("ploidy").add(mutation.getPloidy());
-        data.get("ccf-m-copies").add(mutation.getCcfMCopies());
-        data.get("ccf-m-copies-lower").add(mutation.getCcfMCopiesLower());
-        data.get("ccf-m-copies-upper").add(mutation.getCcfMCopiesUpper());
-        data.get("ccf-m-copies-prob95").add(mutation.getCcfMCopiesProb95());
-        data.get("ccf-m-copies-prob90").add(mutation.getCcfMCopiesProb90());
-        data.get("ccf-1-copy").add(mutation.getCcf1Copy());
-        data.get("ccf-1-copy-lower").add(mutation.getCcf1CopyLower());
-        data.get("ccf-1-copy-upper").add(mutation.getCcf1CopyUpper());
-        data.get("ccf-1-copy-prob95").add(mutation.getCcf1CopyProb95());
-        data.get("ccf-1-copy-prob90").add(mutation.getCcf1CopyProb90());
+        data.get("ccf-m-copies").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcfMCopies()));
+        data.get("ccf-m-copies-lower").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcfMCopiesLower()));
+        data.get("ccf-m-copies-upper").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcfMCopiesUpper()));
+        data.get("ccf-m-copies-prob95").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcfMCopiesProb95()));
+        data.get("ccf-m-copies-prob90").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcfMCopiesProb90()));
+        data.get("ccf-1-copy").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcf1Copy()));
+        data.get("ccf-1-copy-lower").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcf1CopyLower()));
+        data.get("ccf-1-copy-upper").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcf1CopyUpper()));
+        data.get("ccf-1-copy-prob95").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcf1CopyProb95()));
+        data.get("ccf-1-copy-prob90").add(addSampleFloatMap(new HashMap<String,Float>(),sample.getStableId(),mutation.getCcf1CopyProb90()));
         
         // cosmic
         data.get("cosmic").add(convertCosmicDataToMatrix(cosmic));

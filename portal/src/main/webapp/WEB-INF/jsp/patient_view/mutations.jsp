@@ -80,22 +80,22 @@
 
                             $(".cross-cancer-download").click(function() {
                                 var fileType = $(this).attr("file-type");
-	                            var filename = gene + "_mutations." + fileType;
+                                var filename = gene + "_mutations." + fileType;
 
-	                            if (fileType == "pdf")
-	                            {
-		                            cbio.download.initDownload(this_svg, {
-			                            filename: filename,
-			                            contentType: "application/pdf",
-			                            servletName: "svgtopdf.do"
-		                            });
-	                            }
-	                            else // svg
-	                            {
-		                            cbio.download.initDownload(this_svg, {
-			                            filename: filename
-		                            });
-	                            }
+                                if (fileType == "pdf")
+                                {
+                                    cbio.download.initDownload(this_svg, {
+                                        filename: filename,
+                                        contentType: "application/pdf",
+                                        servletName: "svgtopdf.do"
+                                    });
+                                }
+                                else // svg
+                                {
+                                    cbio.download.initDownload(this_svg, {
+                                        filename: filename
+                                    });
+                                }
                             });
 
                             $(invisible_container).empty();     // N.B.
@@ -108,17 +108,34 @@
             });
         });
     };
-    var mutationOncokbInstance;
 
     function buildMutationsDataTable(mutations,mutEventIds, table_id, sDom, iDisplayLength, sEmptyInfo, compact) {
-		var hasCellularFraction = false;
         var data = [];
+        var oncokbInstance;
+        if(OncoKB.getAccess()) {
+            var oncokbInstanceManager = new OncoKB.addInstanceManager();
+            oncokbInstance = oncokbInstanceManager.addInstance('patient-mutation');
+            if(oncokbGeneStatus) {
+                oncokbInstance.setGeneStatus(oncokbGeneStatus);
+            }
+            oncokbInstance.setTumorType(OncoKB.utils.getTumorTypeFromClinicalDataMap(clinicalDataMap));
+        }
+        var hasFACETS = false;
         for (var i=0, nEvents=mutEventIds.length; i<nEvents; i++) {
             var _id = mutEventIds[i];
-        	var cf = mutations.getValue(_id, 'cellular-fraction');
-			if(cf != null) {
-				hasCellularFraction = true;		
-			}
+            if(oncokbInstance) {
+                oncokbInstance.addVariant(_id, mutations.getValue(_id, "entrez"), mutations.getValue(_id, "gene"), 
+                    mutations.getValue(_id, "aa"), 
+                    (_.isObject(patientInfo) ? (patientInfo.CANCER_TYPE_DETAILED || patientInfo.CANCER_TYPE) : '') || cancerType, 
+                    mutations.getValue(_id, "type") ? mutations.getValue(_id, "type") : 'any', 
+                    findCosmic(mutations.getValue(_id, "cosmic"), mutations.getValue(_id, "aa")), 
+                    mutations.getValue(_id, "is-hotspot"), mutations.getValue(_id, 'protein-start'), 
+                    mutations.getValue(_id, 'protein-end'));
+            }
+            var ccf = mutations.getValue(_id, 'ccf-m-copies');
+            if(ccf != null) {
+                hasFACETS = true;        
+            }
             data.push([mutEventIds[i]]);
         }
 
@@ -245,8 +262,7 @@
                                 var datum = {
                                     mutation: {
                                         myCancerGenome: [],
-                                        isHotspot: false,
-                                        get: function(a) { return this[a];}
+                                        isHotspot: false
                                     },
                                     oncokb:{}
                                 };
@@ -286,13 +302,13 @@
 
                                 var aaOriginal = mutations.getValue(source[0], 'aa-orig');
 
-	                            if (window.cancerStudyId.indexOf("mskimpact") !== -1 &&
-	                                isDifferentProteinChange(aa, aaOriginal))
-	                            {
-		                            ret += "&nbsp;<span class='"+table_id+"-tip'" +
-		                                   "alt='The original annotation file indicates a different value: <b>"+normalizeProteinChange(aaOriginal)+"</b>'>" +
-		                                   "<img class='mutationsProteinChangeWarning' height=13 width=13 src='images/warning.gif'></span>";
-	                            }
+                                if (window.cancerStudyId.indexOf("mskimpact") !== -1 &&
+                                    isDifferentProteinChange(aa, aaOriginal))
+                                {
+                                    ret += "&nbsp;<span class='"+table_id+"-tip'" +
+                                           "alt='The original annotation file indicates a different value: <b>"+normalizeProteinChange(aaOriginal)+"</b>'>" +
+                                           "<img class='mutationsProteinChangeWarning' height=13 width=13 src='images/warning.gif'></span>";
+                                }
 
                                 return ret;
                             } else {
@@ -479,27 +495,6 @@
                         },
                         "asSorting": ["desc", "asc"]
                     },
-					{// FACETS cellular fraction 
-                        "aTargets": [ mutTableIndices["cellular_fraction"] ],
-						"bVisible": hasCellularFraction,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-						"mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return "<div class='"+table_id+"-cf' alt='"+mutations.getValue(source[0], 'cellular-fraction')+"'></div>";
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'cellular-fraction'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'cellular-fraction'));
-                            }
-                        }
-
-                    },
                     {// tumor read count frequency
                         "aTargets": [ mutTableIndices["tumor_var_reads"] ],
                         "bVisible": false,
@@ -647,6 +642,414 @@
                         },
                         "asSorting": ["desc", "asc"]
                     },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies"] ],
+                        "bVisible": hasFACETS,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-m-copies');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+                                
+                                return "<div class='"+table_id+"-ccf-m-copies' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-m-copies')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_lower"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-m-copies-lower');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-m-copies-lower' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-m-copies-lower')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }
+								return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_upper"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-m-copies-upper');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-m-copies-upper' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-m-copies-upper')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_prob95"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-m-copies-prob95');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-m-copies-prob95' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-m-copies-prob95')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies_prob90"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-m-copies-prob90');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-m-copies-prob90' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-m-copies-prob90')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-1-copy');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-1-copy' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-1-copy')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_lower"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-1-copy-lower');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-1-copy-lower' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-1-copy-lower')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_upper"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-1-copy-upper');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-1-copy-upper' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-1-copy-upper')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_prob95"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-1-copy-prob95');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-1-copy-prob95' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-1-copy-prob95')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_1_copy_prob90"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'ccf-1-copy-prob90');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA != "NA")
+                                        valOrNA = valOrNA.toFixed(2);
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-ccf-1-copy-prob90' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-1-copy-prob90')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS
+                        "aTargets": [ mutTableIndices["cellular_fraction"] ],
+                        "bVisible": false,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var values = mutations.getValue(source[0], 'cellular-fraction');
+                                if (caseIds.length===1) {
+                                    var val = values[caseIds[0]];
+                                    var valOrNA = floatValueOrNA(val);
+                                    var tip = valOrNA;
+                                    if (valOrNA && valOrNA !== "NA") {
+                                        valOrNA = valOrNA.toFixed(2);
+									}
+                                    return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+valOrNA+"</span>";
+                                }
+
+                                if ($.isEmptyObject(values))
+                                    return "";
+
+                                return "<div class='"+table_id+"-cellular-fraction' alt='"+source[0]+"'></div>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'cellular-fraction')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
                     {// tumor read count frequency
                         "aTargets": [ mutTableIndices["bam"] ],
                         "bVisible": false,//viewBam,
@@ -707,6 +1110,254 @@
                             }
                         },
                         "asSorting": ["desc", "asc"]
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["total_copy_number"] ],
+                        "bVisible": hasFACETS,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var ret = [];
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+									var val = intValueOrNA(mutations.getValue(source[0], 'total-copy-number')[caseIds[i]]);
+									if (cbio.util.checkNullOrUndefined(val)) {
+										continue;
+									}
+                                    ret.push(val);
+                                }
+                                return ret.join(",");
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'total-copy-number')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val)) {
+                                    return -1;
+                                }
+                                return val; // NA values are also -1
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["minor_copy_number"] ],
+                        "bVisible": false,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var ret = [];
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+									var val = intValueOrNA(mutations.getValue(source[0], 'minor-copy-number')[caseIds[i]]);
+									if (cbio.util.checkNullOrUndefined(val)) {
+                                        continue;
+                                    }
+                                    ret.push(val);
+                                }
+                                return ret.join(",");
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'minor-copy-number')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val)) {
+                                    return -1;
+                                }
+                                return val; // NA values are also -1
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS
+                        "aTargets": [ mutTableIndices["facets_copy_number"] ],
+                        "bVisible": hasFACETS,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display' || type==='sort') {
+                                var caseIdsToTips = [];
+								var ret = [];
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+                                    var wgd = clinicalDataMap[caseIds[i]]["FACETS_WGD"];
+                                    var minor_copy_number = intValueOrNA(mutations.getValue(source[0], 'minor-copy-number')[caseIds[i]]);
+                                    var total_copy_number = intValueOrNA(mutations.getValue(source[0], 'total-copy-number')[caseIds[i]]);
+                                    if (cbio.util.checkNullOrUndefined(minor_copy_number) || cbio.util.checkNullOrUndefined(total_copy_number)) {
+										if (type==='sort') {
+											return "ZZZZZ"; // only look at first case for sort
+										}
+										continue;
+									}
+                                    var style = "color:black;font-size:xx-small;";
+									if (minor_copy_number === "NA" || total_copy_number === "NA") {
+										if (type==='sort') {
+											return "ZZZZZ"; // only look at first case for sort
+										}
+										caseIdsToTips.push([caseIds[i], generateFACETSCallTip("NA", wgd, total_copy_number, minor_copy_number)]);
+										ret.push("<span style='"+style+"'>NA</span>");
+                                        continue;
+                                    }
+                                    var major_copy_number = total_copy_number - minor_copy_number;
+									var val = "";
+                                    if (wgd === "no WGD" && major_copy_number === 0 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "HOMDEL";
+                                    } else if (wgd === "no WGD" && major_copy_number === 1 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "HETLOSS";
+                                    } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "CNLOH";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "CNLOH & GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "CNLOH & GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "AMP (LOH)";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "AMP (LOH)";
+                                    } else if (wgd === "no WGD" && major_copy_number === 1 && minor_copy_number === 1) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "DIPLOID";
+                                    } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 1) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 1) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 1) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 1) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 1) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "TETRAPLOID";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP (BALANCED)";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 0 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "HOMDEL";
+                                    } else if (wgd === "WGD" && major_copy_number === 1 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "LOSS BEFORE & AFTER";
+                                    } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "LOSS BEFORE";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "CNLOH BEFORE & LOSS";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "CNLOH BEFORE";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "CNLOH BEFORE & GAIN";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 0) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "AMP (LOH)";
+                                    } else if (wgd === "WGD" && major_copy_number === 1 && minor_copy_number === 1) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "DOUBLE LOSS AFTER";
+                                    } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 1) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "LOSS AFTER";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 1) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "CNLOH AFTER";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 1) {
+                                        style = "color:blue;font-size:smaller;";
+                                        val = "LOSS & GAIN";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 1) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 1) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "TETRAPLOID";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "GAIN";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 2) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP (BALANCED)";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 3) {
+                                        style = "color:red;font-size:smaller;";
+                                        val = "AMP";
+                                    }
+									caseIdsToTips.push([caseIds[i], generateFACETSCallTip(val, wgd, total_copy_number, minor_copy_number)]);
+                                	if (type==='display') {
+										if (val!=="NA") {
+											val = "<b>"+val+"</b>";	
+										}
+                                    	ret.push("<span style='"+style+"'>"+val+"</span>");
+                                	} else {
+                                    	return val; // return with 1st val
+                                	}
+								}
+								return "<span class='"+table_id+"-facets-call' data-facets='"+JSON.stringify(caseIdsToTips)+"'>"+ret.join(",")+"</span>";
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return floatValueOrNA(mutations.getValue(source[0], 'minor-copy-number')[caseIds[0]]);
+                            }
+                        }
                     },
                     {// mrna
                         "aTargets": [ mutTableIndices['mrna'] ],
@@ -930,13 +1581,22 @@
                             if (type==='set') {
                                 return;
                             } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'dip-log-r'));
+								var val = floatValueOrNA(mutations.getValue(source[0], 'dip-log-r'));
+                                var tip = val;
+                                if (val && val !== "NA") {
+                                 	val = val.toFixed(2);
+                                }
+                                return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+val+"</span>";
                             } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'dip-log-r'));
+                                var val = mutations.getValue(source[0], 'dip-log-r');
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
                             } else if (type==='type') {
                                 return 0.0;
                             } else {
-                                return valueOrNA(mutations.getValue(source[0], 'dip-log-r'));
+                                return 0.0;
                             }
                         }
                     },
@@ -950,53 +1610,31 @@
                             if (type==='set') {
                                 return;
                             } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'seg-mean'));
+                                var ret = [];
+								var tip = [];
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+									var val = mutations.getValue(source[0], 'seg-mean')[caseIds[i]];
+									if (cbio.util.checkNullOrUndefined(val)) {
+										continue;
+									}
+									val = floatValueOrNA(val);
+									tip.push(val);
+									if (val && val !== "NA") {
+										val = val.toFixed(2);
+									}
+                                    ret.push(val);
+                                }
+                                return "<span class='"+table_id+"-tip' alt='"+tip.join(",")+"'>"+ret.join(",")+"</span>";
                             } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'seg-mean'));
+                                var val = mutations.getValue(source[0], 'seg-mean')[caseIds[0]];
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
                             } else if (type==='type') {
                                 return 0.0;
                             } else {
-                                return valueOrNA(mutations.getValue(source[0], 'seg-mean'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["total_copy_number"] ],
-                        "bVisible": true,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'total-copy-number'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'total-copy-number'));
-                            } else if (type==='type') {
-                                return 0.0; 
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'total-copy-number'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["minor_copy_number"] ],
-                        "bVisible": true,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'minor-copy-number'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'minor-copy-number'));
-                            } else if (type==='type') {
                                 return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'minor-copy-number'));
                             }
                         }
                     },
@@ -1010,13 +1648,22 @@
                             if (type==='set') {
                                 return;
                             } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'purity'));
+								var val = floatValueOrNA(mutations.getValue(source[0], 'purity'));
+								var tip = val;
+                                if (val && val !== "NA") {
+                                	val = val.toFixed(2);
+                                }
+                                return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+val+"</span>";
                             } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'purity'));
+                                var val = mutations.getValue(source[0], 'purity');
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
                             } else if (type==='type') {
                                 return 0.0;
                             } else {
-                                return valueOrNA(mutations.getValue(source[0], 'purity'));
+                                return 0.0;
                             }
                         }
                     },
@@ -1030,213 +1677,22 @@
                             if (type==='set') {
                                 return;
                             } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ploidy'));
+                                var val = floatValueOrNA(mutations.getValue(source[0], 'ploidy'));
+								var tip = val;
+								if (val && val !== "NA") {
+                                    val = val.toFixed(2);
+                                }   
+                                return "<span class='"+table_id+"-tip' alt='"+tip+"'>"+val+"</span>";
                             } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ploidy'));
+                                var val = mutations.getValue(source[0], 'ploidy');
+                                if (cbio.util.checkNullOrUndefined(val) || val == <%= Float.MIN_VALUE %>) {
+                                    return -<%= Float.MAX_VALUE %>;
+                                }   
+                                return val;
                             } else if (type==='type') {
                                 return 0.0;
                             } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ploidy'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_m_copies"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies'));
-                            } else if (type==='type') {
                                 return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_m_copies_lower"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-lower'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-lower'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-lower'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_m_copies_upper"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-upper'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-upper'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-upper'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_m_copies_prob95"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob95'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob95'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob95'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_m_copies_prob90"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob90'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob90'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-m-copies-prob90'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_1_copy"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_1_copy_lower"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-lower'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-lower'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-lower'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_1_copy_upper"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-upper'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-upper'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-upper'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_1_copy_prob95"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob95'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob95'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob95'));
-                            }
-                        }
-                    },
-                    {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_1_copy_prob90"] ],
-                        "bVisible": false,
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob90'));
-                            } else if (type==='sort') {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob90'));
-                            } else if (type==='type') {
-                                return 0.0;
-                            } else {
-                                return valueOrNA(mutations.getValue(source[0], 'ccf-1-copy-prob90'));
                             }
                         }
                     }
@@ -1246,10 +1702,22 @@
                         plotCaseLabel('.'+table_id+'-case-label',true);
                         plotAlleleFreq("."+table_id+"-tumor-freq",mutations,"alt-count","ref-count");
                         plotAlleleFreq("."+table_id+"-normal-freq",mutations,"normal-alt-count","normal-ref-count");
+						if (hasFACETS) {
+                        	plotFraction("."+table_id+"-ccf-m-copies",mutations,"ccf-m-copies");
+                        	plotFraction("."+table_id+"-ccf-m-copies-lower",mutations,"ccf-m-copies-lower");
+                        	plotFraction("."+table_id+"-ccf-m-copies-upper",mutations,"ccf-m-copies-upper");
+                        	plotFraction("."+table_id+"-ccf-m-copies-prob95",mutations,"ccf-m-copies-prob95");
+                        	plotFraction("."+table_id+"-ccf-m-copies-prob90",mutations,"ccf-m-copies-prob90");
+                        	plotFraction("."+table_id+"-ccf-1-copy",mutations,"ccf-1-copy");
+                        	plotFraction("."+table_id+"-ccf-1-copy-lower",mutations,"ccf-1-copy-lower");
+                        	plotFraction("."+table_id+"-ccf-1-copy-upper",mutations,"ccf-1-copy-upper");
+                        	plotFraction("."+table_id+"-ccf-1-copy-prob95",mutations,"ccf-1-copy-prob95");
+                        	plotFraction("."+table_id+"-ccf-1-copy-prob90",mutations,"ccf-1-copy-prob90");
+                        	plotFraction("."+table_id+"-cellular-fraction",mutations,"cellular-fraction");
+						}
                     }
                     plotMrna("."+table_id+"-mrna",mutations);
                     plotMutRate("."+table_id+"-mut-cohort",mutations);
-                    plotCF("."+table_id+"-cf");
                     addNoteTooltip("."+table_id+"-tip");
                     addNoteTooltip("."+table_id+"-ma-tip",null,{my:'top right',at:'bottom center',viewport: $(window)});
                     if(showHotspot) {
@@ -1259,11 +1727,14 @@
                     addCosmicTooltip(table_id);
                     listenToBamIgvClick(".igv-link");
                     //drawPanCanThumbnails(this);
-                    if(mutationOncokbInstance){
-                        mutationOncokbInstance.addEvents(this, 'gene');
-                        mutationOncokbInstance.addEvents(this, 'alteration');
-                        mutationOncokbInstance.addEvents(this, 'column');
+                    if(oncokbInstance){
+                        oncokbInstance.addEvents(this, 'gene');
+                        oncokbInstance.addEvents(this, 'alteration');
+                        oncokbInstance.addEvents(this, 'column');
                     }
+					if (hasFACETS) {
+						addCaseIdTooltip("."+table_id+"-facets-call","facets");
+					}
                 },
                 "bPaginate": true,
                 "sPaginationType": "two_button",
@@ -1277,6 +1748,25 @@
                 "iDisplayLength": iDisplayLength,
                 "aLengthMenu": [[5,10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "All"]]
         } );
+
+        if(oncokbInstance) {
+            oncokbInstance.getIndicator().then(function () {
+                var tableData = oTable.fnGetData();
+                var oncokbEvidence = [];
+                _.each(tableData, function(ele, i) {
+                    oncokbEvidence.push(oncokbInstance.getVariant(ele[0]));
+                });
+                mutations.addData('oncokb', oncokbEvidence)
+                if (tableData.length > 0)
+                {
+                    _.each(tableData, function(ele, i) {
+                        oTable.fnUpdate(null, i, mutTableIndices["annotation"], false, false);
+                    });
+
+                    oTable.fnUpdate(null, 0, mutTableIndices['annotation']);
+                }
+            });
+        }
 
         oTable.css("width","100%");
         addNoteTooltip("#"+table_id+" th.mut-header");
@@ -1368,7 +1858,7 @@
         function qtip(el, tip) {
             $(el).qtip({
                 content: {text: tip},
-	            show: {event: "mouseover"},
+                show: {event: "mouseover"},
                 hide: {fixed: true, delay: 200, event: "mouseout"},
                 style: { classes: 'qtip-light qtip-rounded' },
                 position: {my:'top right',at:'bottom center',viewport: $(window)}
@@ -1376,57 +1866,98 @@
         }
     }
 
-	function valueOrNA(value) {
-		if (value == -1 || value == <%= Float.MIN_VALUE %>) {
-			return "NA"
-		}
-		return value;
+    function floatValueOrNA(value) {
+        return valueOrNA(value, <%= Float.MIN_VALUE %>);
+    }
+
+    function intValueOrNA(value) {
+        return valueOrNA(value, -1);
+    }
+
+    function valueOrNA(value, NA_VALUE) {
+        if (value == NA_VALUE) {
+            return "NA";
+        }
+        return value;
+    }
+
+	function generateFACETSCallTip(call, wgd, total_copy_number, minor_copy_number) {
+		return "<b>"+call+"</b> ("+wgd+" with a total copy number of "+total_copy_number+" and a minor copy number of "+minor_copy_number+")";
 	}
 
-    function plotCF(div) {
-        $(div).each(function() {
-            if (!$(this).is(":empty")) return; // if not empty do not modify
-            var fraction = $(this).attr("alt");
-
-			if (fraction == <%= Float.MIN_VALUE%>) {
-				$(this).text("NA");
-				return;
-			}
-
-            var keyperc = 100 * fraction;
-
-            var data = [keyperc, 100-keyperc];
-            var colors = ["blue", "#ccc"];
-
-            var svg = d3.select($(this)[0])
-                .append("svg")
-                .attr("width", 86)
-                .attr("height", 12);
-
-            var percg = svg.append("g");
-            percg.append("text")
-                    .attr('x',70)
-                    .attr('y',11)
-                    .attr("text-anchor", "end")
-                    .attr('font-size',10)
-                    .text(keyperc.toFixed(1)+"%");
-
-            var gSvg = percg.append("g");
-            var pie = d3AccBar(gSvg, data, 30, colors);
-            var tip = fraction;
-            qtip($(percg), tip);
-
-        });
-
-        function qtip(el, tip) {
-            $(el).qtip({
-                content: {text: tip},
-	            show: {event: "mouseover"},
-                hide: {fixed: true, delay: 200, event: "mouseout"},
-                style: { classes: 'qtip-light qtip-rounded' },
-                position: {my:'top right',at:'bottom center',viewport: $(window)}
+	function addCaseIdTooltip(div, dataRef) {
+		$(div).each(function() {
+			var calls = $(this).data(dataRef);
+    		// tooltip
+            var arr = [];
+            calls.forEach(function(call){
+				if (caseIds.length === 1) {
+            		arr.push(call[1]);
+				} else {
+            		arr.push("<svg width='12' height='12' class='case-label-tip' alt='"+call[0]+"'></svg>&nbsp;"+call[1]);
+				}
             });
-        }
+
+			var tip = arr.join("<br/>");
+				
+	        $(this).qtip({
+            	content: {text: tip},
+                events: {
+                    render: function(event, api) {
+                        plotCaseLabel('.case-label-tip', true, true);
+                    }
+                },
+                show: {event: "mouseover"},
+                hide: {fixed: true, delay: 10, event: "mouseout"},
+                style: { classes: 'qtip-light qtip-rounded' },
+                position: {my:'top left',at:'bottom center',viewport: $(window)}
+            });
+		});
+	}
+
+    function plotFraction(div, mutations, dataRef) {
+        $(div).each(function() {
+            if (!$(this).is(":empty")) return;
+            var gene = $(this).attr("alt");
+
+            var values = mutations.getValue(gene, dataRef);
+            var caseIdToValue = {};
+
+            for (var caseId in values) {
+                var val = values[caseId];
+                if (!cbio.util.checkNullOrUndefined(val) && val != <%= Float.MIN_VALUE%>) {
+                    caseIdToValue[caseId] = val.toFixed(2);
+                }    
+            }
+            d3AlleleFreqBar($(this)[0],caseIdToValue);
+    
+            // tooltip
+            var arr = [];
+            caseIds.forEach(function(caseId){
+                var val = values[caseId];
+                if (!cbio.util.checkNullOrUndefined(val)) {
+                    if (val == <%= Float.MIN_VALUE%>) {
+                        arr.push("<svg width='12' height='12' class='case-label-tip' alt='"+caseId+"'></svg>&nbsp;<b>NA</b>");
+                    } else {
+                        arr.push("<svg width='12' height='12' class='case-label-tip' alt='"+caseId+"'></svg>&nbsp;<b>"
+                            +val+"</b>");
+                    }
+                }
+            });
+            var tip = arr.join("<br/>");
+            $(this).qtip({
+                content: {text: tip},
+                events: {
+                    render: function(event, api) {
+                        plotCaseLabel('.case-label-tip', true, true);
+                    }
+                },
+                show: {event: "mouseover"},
+                hide: {fixed: true, delay: 10, event: "mouseout"},
+                style: { classes: 'qtip-light qtip-rounded' },
+                position: {my:'top left',at:'bottom center',viewport: $(window)}
+            });
+        });
     }
 
     function addCosmicTooltip(table_id) {
@@ -1478,7 +2009,7 @@
                     } ).removeClass('uninitialized');
                 }
             },
-	        show: {event: "mouseover"},
+            show: {event: "mouseover"},
             hide: {fixed: true, delay: 100, event: "mouseout"},
             style: { classes: 'qtip-light qtip-rounded qtip-wide' },
             position: {my:'top right',at:'bottom center',viewport: $(window)}
@@ -1619,37 +2150,7 @@
                                 _.extend(munge(byProteinPosResponse, "protein_start_with_hugo"), munge(byKeywordResponse, "keyword"), munge(byHugoResponse, "hugo")));
                         genomicEventObs.fire("pancan-mutation-frequency-built");
                     });
-                    
-                    // Get OncoKB info
-                    mutationOncokbInstance = initOncoKB('patient-mutation', genomicEventObs.mutations.getEventIds(false), genomicEventObs.mutations, 'mutation', function() {
-                        var mutationSummaryTable = $('#mutation_summary_table').dataTable();
-                        var mutationTable = $('#mutation_table').dataTable();
 
-                        var mutationSummaryTableData = mutationSummaryTable.fnGetData();
-                        var mutationTableData = mutationTable.fnGetData();
-
-                        var oncokbEvidence = [];
-                        _.each(mutationTableData, function(ele, i) {
-                            oncokbEvidence.push(mutationOncokbInstance.getVariant(ele[0]));
-                        });
-                        genomicEventObs.mutations.addData('oncokb', oncokbEvidence);
-
-                        if (mutationTableData.length > 0){
-                            _.each(mutationTableData, function(ele, i) {
-                                mutationTable.fnUpdate(null, i, mutTableIndices["annotation"], false, false);
-                            });
-
-                            mutationTable.fnUpdate(null, 0, mutTableIndices['annotation']);
-                        }
-
-                        if (mutationSummaryTableData.length > 0){
-                            _.each(mutationSummaryTableData, function(ele, i) {
-                                mutationSummaryTable.fnUpdate(null, i, mutTableIndices["annotation"], false, false);
-                            });
-
-                            mutationSummaryTable.fnUpdate(null, 0, mutTableIndices['annotation']);
-                        }
-                    });
                 }
                 ,"json"
         );
@@ -1747,54 +2248,54 @@
      */
     function isDifferentProteinChange(proteinChange, aminoAcidChange)
     {
-	    var different = false;
+        var different = false;
 
-	    proteinChange = normalizeProteinChange(proteinChange);
-	    aminoAcidChange = normalizeProteinChange(aminoAcidChange);
+        proteinChange = normalizeProteinChange(proteinChange);
+        aminoAcidChange = normalizeProteinChange(aminoAcidChange);
 
-	    // if the normalized strings are exact, no need to do anything further
-	    if (aminoAcidChange !== proteinChange)
-	    {
-		    // assuming each uppercase letter represents a single protein
-		    var proteinMatch1 = proteinChange.match(/[A-Z]/g);
-		    var proteinMatch2 = aminoAcidChange.match(/[A-Z]/g);
+        // if the normalized strings are exact, no need to do anything further
+        if (aminoAcidChange !== proteinChange)
+        {
+            // assuming each uppercase letter represents a single protein
+            var proteinMatch1 = proteinChange.match(/[A-Z]/g);
+            var proteinMatch2 = aminoAcidChange.match(/[A-Z]/g);
 
-		    // assuming the first numeric value is the location
-		    var locationMatch1 = proteinChange.match(/[0-9]+/);
-		    var locationMatch2 = aminoAcidChange.match(/[0-9]+/);
+            // assuming the first numeric value is the location
+            var locationMatch1 = proteinChange.match(/[0-9]+/);
+            var locationMatch2 = aminoAcidChange.match(/[0-9]+/);
 
-		    // assuming first lowercase value is somehow related to
-		    var typeMatch1 = proteinChange.match(/([a-z]+)/);
-		    var typeMatch2 = aminoAcidChange.match(/([a-z]+)/);
+            // assuming first lowercase value is somehow related to
+            var typeMatch1 = proteinChange.match(/([a-z]+)/);
+            var typeMatch2 = aminoAcidChange.match(/([a-z]+)/);
 
-		    if (locationMatch1 && locationMatch2 &&
-		        locationMatch1.length > 0 && locationMatch2.length > 0 &&
-		        locationMatch1[0] != locationMatch2[0])
-		    {
-			    different = true;
-		    }
-		    else if (proteinMatch1 && proteinMatch2 &&
-		             proteinMatch1.length > 0 && proteinMatch2.length > 0 &&
-		             proteinMatch1[0] !== "X" && proteinMatch2[0] !== "X" &&
-		             proteinMatch1[0] !== proteinMatch2[0])
-		    {
-			    different = true;
-		    }
-		    else if (proteinMatch1 && proteinMatch2 &&
-		             proteinMatch1.length > 1 && proteinMatch2.length > 1 &&
-		             proteinMatch1[1] !== proteinMatch2[1])
-		    {
-			    different = true;
-		    }
-		    else if (typeMatch1 && typeMatch2 &&
-		             typeMatch1.length > 0 && typeMatch2.length > 0 &&
-		             typeMatch1[0] !== typeMatch2[0])
-		    {
-			    different = true;
-		    }
-	    }
+            if (locationMatch1 && locationMatch2 &&
+                locationMatch1.length > 0 && locationMatch2.length > 0 &&
+                locationMatch1[0] != locationMatch2[0])
+            {
+                different = true;
+            }
+            else if (proteinMatch1 && proteinMatch2 &&
+                     proteinMatch1.length > 0 && proteinMatch2.length > 0 &&
+                     proteinMatch1[0] !== "X" && proteinMatch2[0] !== "X" &&
+                     proteinMatch1[0] !== proteinMatch2[0])
+            {
+                different = true;
+            }
+            else if (proteinMatch1 && proteinMatch2 &&
+                     proteinMatch1.length > 1 && proteinMatch2.length > 1 &&
+                     proteinMatch1[1] !== proteinMatch2[1])
+            {
+                different = true;
+            }
+            else if (typeMatch1 && typeMatch2 &&
+                     typeMatch1.length > 0 && typeMatch2.length > 0 &&
+                     typeMatch1[0] !== typeMatch2[0])
+            {
+                different = true;
+            }
+        }
 
-	    return different;
+        return different;
     }
 
     // TODO: DUPLICATED FUNCTION from mutation-mapper.
@@ -1804,14 +2305,14 @@
                 return "";
             }
 
-	    var prefix = "p.";
+        var prefix = "p.";
 
-	    if (proteinChange.indexOf(prefix) !== -1)
-	    {
-		    proteinChange = proteinChange.substr(proteinChange.indexOf(prefix) + prefix.length);
-	    }
+        if (proteinChange.indexOf(prefix) !== -1)
+        {
+            proteinChange = proteinChange.substr(proteinChange.indexOf(prefix) + prefix.length);
+        }
 
-	    return proteinChange;
+        return proteinChange;
     }
 
 </script>
@@ -1829,3 +2330,4 @@
         </td>
     </tr>
 </table>
+

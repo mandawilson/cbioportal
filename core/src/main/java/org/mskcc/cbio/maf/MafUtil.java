@@ -145,7 +145,7 @@ public class MafUtil
 	public static final String MA_LINK_PDB = "MA:link.PDB";
 	public static final String MA_PROTEIN_CHANGE = "MA:protein.change";
 
-	// FACETS column names
+	// FACETS column names -- TODO rename with FACETS
 	public static final String DIP_LOG_R = "dipLogR";
 	public static final String SEG_MEAN = "seg.mean";
 	public static final String CELLULAR_FRACTION = "cf";
@@ -250,7 +250,7 @@ public class MafUtil
 	private int maLinkPdbIndex = -1; // MA:link.PDB
 	private int maProteinChangeIndex = -1; // MA:protein.change
 
-	// FACETS column indices
+	// FACETS column indices -- TODO rename with FACETS
 	private int dipLogRIndex = -1;
 	private int segMeanIndex = -1;
 	private int cellularFractionIndex = -1;
@@ -610,6 +610,7 @@ public class MafUtil
 		record.setDipLogR(TabDelimitedFileUtil.getPartFloat2(dipLogRIndex, parts));
 		record.setSegMean(TabDelimitedFileUtil.getPartFloat2(segMeanIndex, parts));
 		record.setCellularFraction(TabDelimitedFileUtil.getPartFloat2(cellularFractionIndex, parts));
+		// these copy number values are positive integers, so OK to use -1
 		record.setTotalCopyNumber(TabDelimitedFileUtil.getPartInt(totalCopyNumberIndex, parts));
 		record.setMinorCopyNumber(TabDelimitedFileUtil.getPartInt(minorCopyNumberIndex, parts));
 		record.setPurity(TabDelimitedFileUtil.getPartFloat2(purityIndex, parts));
