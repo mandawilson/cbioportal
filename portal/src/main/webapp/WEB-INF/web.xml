@@ -71,6 +71,21 @@
     </filter-mapping>
 
     <filter>
+      <filter-name>APICorsFilter</filter-name>
+      <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+      <init-param>
+        <param-name>cors.allowed.origins</param-name>
+        <!-- limit to portal server -->
+        <param-value>${session.service.origin}</param-value>
+      </init-param>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>APICorsFilter</filter-name>
+      <url-pattern>/api-legacy/proxy/session-service/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
@@ -226,14 +241,14 @@
         <url-pattern>/portal_meta_data.json</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-		<servlet-name>portal_meta_data</servlet-name>
-		<servlet-class>org.mskcc.cbio.portal.servlet.PortalMetaData</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>portal_meta_data</servlet-name>
-		<url-pattern>/portalMetadata.json</url-pattern>
-	</servlet-mapping>
+    <servlet>
+        <servlet-name>portal_meta_data</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.PortalMetaData</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>portal_meta_data</servlet-name>
+        <url-pattern>/portalMetadata.json</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>network</servlet-name>
@@ -244,19 +259,19 @@
         <url-pattern>/network.do</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-		<servlet-name>network_sbgn</servlet-name>
-		<servlet-class>org.mskcc.cbio.portal.servlet.NetworkSbgnServlet</servlet-class>
-	</servlet>
+    <servlet>
+        <servlet-name>network_sbgn</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.NetworkSbgnServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>network_sbgn</servlet-name>
         <url-pattern>/networkSbgn.do</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-		<servlet-name>bioGeneQuery</servlet-name>
-		<servlet-class>org.mskcc.cbio.portal.servlet.BioGeneServlet</servlet-class>
-	</servlet>
+    <servlet>
+        <servlet-name>bioGeneQuery</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.BioGeneServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>bioGeneQuery</servlet-name>
         <url-pattern>/bioGeneQuery.do</url-pattern>
@@ -272,7 +287,7 @@
     </servlet-mapping>
 
     <servlet>
-    	<servlet-name>CheckGeneSymbolJSON</servlet-name>
+        <servlet-name>CheckGeneSymbolJSON</servlet-name>
         <servlet-class>org.mskcc.cbio.portal.servlet.CheckGeneSymbolJSON</servlet-class>
     </servlet>
     <servlet-mapping>
@@ -281,7 +296,7 @@
     </servlet-mapping>
     
     <servlet>
-    	<servlet-name>ClinicalFreeFormJSON</servlet-name>
+        <servlet-name>ClinicalFreeFormJSON</servlet-name>
         <servlet-class>org.mskcc.cbio.portal.servlet.ClinicalFreeFormJSON</servlet-class>
     </servlet>
     <servlet-mapping>
@@ -298,37 +313,37 @@
         <url-pattern>/omaRedirect.do</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-		<servlet-name>pfam_sequence_json</servlet-name>
-		<servlet-class>org.mskcc.cbio.portal.servlet.PfamSequenceServlet</servlet-class>
-	</servlet>
+    <servlet>
+        <servlet-name>pfam_sequence_json</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.PfamSequenceServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>pfam_sequence_json</servlet-name>
         <url-pattern>/getPfamSequence.json</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-		<servlet-name>mutation_aligner_json</servlet-name>
-		<servlet-class>org.mskcc.cbio.portal.servlet.MutationAlignerServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>mutation_aligner_json</servlet-name>
-		<url-pattern>/getMutationAligner.json</url-pattern>
-	</servlet-mapping>
+    <servlet>
+        <servlet-name>mutation_aligner_json</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.MutationAlignerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>mutation_aligner_json</servlet-name>
+        <url-pattern>/getMutationAligner.json</url-pattern>
+    </servlet-mapping>
 
-	<servlet>
-		<servlet-name>mutation_3d_json</servlet-name>
-		<servlet-class>org.mskcc.cbio.portal.servlet.PdbDataServlet</servlet-class>
-	</servlet>
+    <servlet>
+        <servlet-name>mutation_3d_json</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.PdbDataServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>mutation_3d_json</servlet-name>
         <url-pattern>/get3dPdb.json</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-		<servlet-name>mutation_data_json</servlet-name>
-		<servlet-class>org.mskcc.cbio.portal.servlet.MutationDataServlet</servlet-class>
-	</servlet>
+    <servlet>
+        <servlet-name>mutation_data_json</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.MutationDataServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>mutation_data_json</servlet-name>
         <url-pattern>/getMutationData.json</url-pattern>

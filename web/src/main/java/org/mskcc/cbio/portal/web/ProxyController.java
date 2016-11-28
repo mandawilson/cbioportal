@@ -55,6 +55,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.*;
 
+import org.mskcc.cbio.portal.web.error.SessionInvalidException;
+import org.mskcc.cbio.portal.web.util.SessionServiceValidator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -186,8 +189,12 @@ public class ProxyController
 
   @RequestMapping(value="/session-service/{type}", method = RequestMethod.POST)
   public @ResponseBody Map addSessionService(@PathVariable String type, @RequestBody JSONObject body, HttpMethod method,
-                                                HttpServletRequest request, HttpServletResponse response) throws URISyntaxException
+                                                HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, SessionInvalidException
   {
+    if (!SessionServiceValidator.isValid(body, request)) {
+      throw new SessionInvalidException();
+    }
+
     RestTemplate restTemplate = new RestTemplate();
     URI uri = new URI(sessionServiceURL + type);
 

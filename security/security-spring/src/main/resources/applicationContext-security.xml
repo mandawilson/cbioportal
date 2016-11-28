@@ -46,19 +46,19 @@
     <http pattern="/saml/js/**" security="none"/>
     <http pattern="/gfx/**" security="none"/>
     <http pattern="/saml/gfx/**" security="none"/>
-		
+
     <!-- end beans shared across any authentication provider -->
     </b:beans>
 
     <!-- googleplus beans -->
     <b:beans profile="googleplus">
 
-    <http entry-point-ref="authenticationEntryPoint" use-expressions="true"> 
+    <http entry-point-ref="authenticationEntryPoint" use-expressions="true">
 <intercept-url pattern="/auth/*" access="permitAll"/><intercept-url pattern="/favicon.ico" access="permitAll"/><intercept-url pattern="/login.jsp*" access="permitAll"/><intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/><intercept-url pattern="/**" access="isAuthenticated()"/>
         <!-- used for google+ authentication (spring social) -->
         <custom-filter ref="socialAuthenticationFilter" before="PRE_AUTH_FILTER" />
 
-        <!--  logout actions -->      
+        <!--  logout actions -->
         <logout logout-success-url="/login.jsp?logout_success=true" delete-cookies="JSESSIONID"/>
         <!-- to enable access from matlab, r, python, etc clients -->
         <session-management session-fixation-protection="none"/>
@@ -86,7 +86,7 @@
         </authentication-provider>
         <authentication-provider ref="socialAuthenticationProvider"/>
     </authentication-manager>
-    
+
     <!-- beans used to compare token returned by authentication-provider against portal user db tables -->
     <b:bean id="userDetailsService" class="org.cbioportal.security.spring.authentication.googleplus.PortalUserDetailsService">
     </b:bean>
@@ -105,7 +105,7 @@
     <!--Implementation of UserIdSource that returns the Spring Security Authentication's name as the user ID -->
     <b:bean id="userIdSource" class="org.springframework.social.security.AuthenticationNameUserIdSource"/>
 
-    <b:bean id="usersConnectionRepository" 
+    <b:bean id="usersConnectionRepository"
             class="org.springframework.social.connect.mem.InMemoryUsersConnectionRepository">
         <b:constructor-arg ref="connectionFactoryLocator" />
         <b:property name="connectionSignUp" ref="connectionSignUp"/>
@@ -128,14 +128,14 @@
         <b:constructor-arg value="${googleplus.consumer.key}" />
         <b:constructor-arg value="${googleplus.consumer.secret}" />
     </b:bean>
-   
+
     <!-- end googleplus beans -->
     </b:beans>
 
     <!-- openid beans -->
     <b:beans profile="openid">
 
-    <http use-expressions="true"> 
+    <http use-expressions="true">
 
         <openid-login login-page="/login.jsp" default-target-url="/index.do" user-service-ref="customUserService" authentication-failure-url="/login.jsp?login_error=true">
             <attribute-exchange identifier-match="https://www.google.com/.*">
@@ -153,7 +153,7 @@
             </attribute-exchange>
       </openid-login>
 
-        <!--  logout actions -->      
+        <!--  logout actions -->
         <logout logout-success-url="/login.jsp?logout_success=true"/>
         <!-- to enable access from matlab, r, python, etc clients -->
         <session-management session-fixation-protection="none"/>
@@ -480,10 +480,23 @@
         <!-- end ldap beans -->
     </b:beans>
 
-    <!-- authenticate is off beans --> 
+    <!-- authenticate is off beans -->
     <b:beans profile="false">
-    <global-method-security pre-post-annotations="disabled"/>
-    <http pattern="/**" security="none"/>
+        <global-method-security pre-post-annotations="disabled"/>
+        <http pattern="/**" security="none"/>
+    </b:beans>
+
+    <!-- authenticate is off but we have session-service beans -->
+    <b:beans profile="noauthsessionservice">
+        <global-method-security pre-post-annotations="disabled"/>
+        <b:bean id="sessionSecurity" class="org.mskcc.cbio.portal.util.SessionServiceSecurity"/>
+        <!-- create-session is never so spring security will not create the session,
+            this relies on the app creating the session -->
+        <http use-expressions="true" entry-point-ref="restAuthenticationEntryPoint" create-session="never">
+            <intercept-url pattern="/api-legacy/proxy/session-service/**" access="@sessionSecurity.check(request)"/>
+            <intercept-url pattern="/**" access="permitAll"/>
+        </http>
+        <!--authentication-manager alias="authenticationManager"/-->
     </b:beans>
 
 </b:beans>
