@@ -30,26 +30,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.mskcc.cbio.portal.web.error;
+package org.cbioportal.security.spring.sessionservice;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-/**
- *
- * @author Manda Wilson
- */
-@ResponseStatus(value=HttpStatus.BAD_REQUEST, reason="Invalid session")
-public class SessionInvalidException extends RuntimeException {
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
 
-  private static Log LOG = LogFactory.getLog(SessionInvalidException.class);
-
-  public SessionInvalidException() {
-    super();
-    LOG.debug("SessionInvalidException()");
-  }
-
-} 
+@Component
+public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint{
+ 
+   @Override
+   public void commence( HttpServletRequest request, HttpServletResponse response, 
+    AuthenticationException authException ) throws IOException{
+      response.sendError( HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized" );
+   }
+}

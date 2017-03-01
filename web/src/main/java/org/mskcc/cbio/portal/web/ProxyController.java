@@ -55,9 +55,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.*;
 
-import org.mskcc.cbio.portal.web.error.SessionInvalidException;
-import org.mskcc.cbio.portal.web.util.SessionServiceValidator;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -189,12 +186,8 @@ public class ProxyController
 
   @RequestMapping(value="/session-service/{type}", method = RequestMethod.POST)
   public @ResponseBody Map addSessionService(@PathVariable String type, @RequestBody JSONObject body, HttpMethod method,
-                                                HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, SessionInvalidException
+                                                HttpServletRequest request, HttpServletResponse response) throws URISyntaxException
   {
-    if (!SessionServiceValidator.isValid(body, request)) {
-      throw new SessionInvalidException();
-    }
-
     RestTemplate restTemplate = new RestTemplate();
     URI uri = new URI(sessionServiceURL + type);
 
@@ -213,9 +206,10 @@ public class ProxyController
 		restTemplate.setErrorHandler(new CustomResponseErrorHandler());
 		URI uri = new URI(sessionServiceURL + "virtual_cohort");
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null) {
+		if (authentication != null && authentication.getPrincipal() instanceof User) {
 			body.put("userID", ((User) authentication.getPrincipal()).getUsername());
 		} else {
+      // for us if authentication.getPrincipal() is a String it is the Spring anonymousUser
 			body.put("userID", "DEFAULT");
 		}
 		return restTemplate.exchange(uri, HttpMethod.POST,

@@ -489,14 +489,17 @@
     <!-- authenticate is off but we have session-service beans -->
     <b:beans profile="noauthsessionservice">
         <global-method-security pre-post-annotations="disabled"/>
-        <b:bean id="sessionSecurity" class="org.mskcc.cbio.portal.util.SessionServiceSecurity"/>
+        <b:bean id="restAuthenticationEntryPoint" class="org.cbioportal.security.spring.sessionservice.RestAuthenticationEntryPoint"/>
+        <b:bean id="sessionSecurity" class="org.cbioportal.security.spring.sessionservice.SessionServiceSecurity"/>
         <!-- create-session is never so spring security will not create the session,
             this relies on the app creating the session -->
         <http use-expressions="true" entry-point-ref="restAuthenticationEntryPoint" create-session="never">
-            <intercept-url pattern="/api-legacy/proxy/session-service/**" access="@sessionSecurity.check(request)"/>
+            <intercept-url pattern="/api-legacy/proxy/session-service/**" access="@sessionSecurity.checkWrite(request)"/>
+            <intercept-url pattern="/api-legacy/proxy/virtual-cohort/" access="@sessionSecurity.checkWrite(request)"/>
+            <intercept-url pattern="/api-legacy/proxy/virtual-cohort/**" access="@sessionSecurity.checkRead(request)"/>
             <intercept-url pattern="/**" access="permitAll"/>
         </http>
-        <!--authentication-manager alias="authenticationManager"/-->
+        <authentication-manager alias="authenticationManager"/>
     </b:beans>
 
 </b:beans>

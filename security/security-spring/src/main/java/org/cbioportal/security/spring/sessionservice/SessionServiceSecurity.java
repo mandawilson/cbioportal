@@ -29,63 +29,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-package org.mskcc.cbio.portal.web.util;
+package org.cbioportal.security.spring.sessionservice;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.json.simple.JSONObject;
+public class SessionServiceSecurity {
 
-/**
- *
- * @author Manda Wilson
- */
-public class SessionServiceValidator {
-
-  private static int MAX_LENGTH = 10000;
-  private static int MAX_SESSION_SERVICE_REQ = 10;
   private static String NUM_SESSION_SERVICE_REQ = "count_session_requests";
+  private static int MAX_SESSION_SERVICE_REQ = 3;
 
-  private static Log LOG = LogFactory.getLog(SessionServiceValidator.class);
+  private static Log LOG = LogFactory.getLog(SessionServiceSecurity.class);
 
-  public static boolean isValid(JSONObject session, HttpServletRequest request) {
-    if (session.isEmpty()) {
-      LOG.warn("SessionServiceValidator.isValid() -- session is empty");
-      return false;
-    } 
+  public boolean checkRead(HttpServletRequest request) {
+    return request.getSession(false) != null;
+  }
 
-    String sessionString = session.toString();
-    int sessionLength = sessionString.length();
-    if (MAX_LENGTH < sessionLength) {
-      LOG.warn("SessionServiceValidator.isValid() -- session is too long, length is = " + 
-        sessionLength + " (MAX_LENGTH = " + MAX_LENGTH + ")");
+	public boolean checkWrite(HttpServletRequest request) {
+    if (request.getSession(false) == null)  {
       return false;
     }
-
+    
     Integer countRequests = (Integer) request.getSession().getAttribute(NUM_SESSION_SERVICE_REQ);
     int count = 0;
-    // do this last after we have checked this is valid
     if (countRequests == null) {
       count = 1; 
     } else {
       count = countRequests.intValue();   
       count += 1;
     }
-    LOG.debug("SessionServiceValidator.isValid() -- " + count + 
+    LOG.debug("SessionServiceSecurity.check() -- " + count + 
       " session service API requests made by this session (MAX_SESSION_SERVICE_REQ = " + 
       MAX_SESSION_SERVICE_REQ + ")");
     request.getSession().setAttribute(NUM_SESSION_SERVICE_REQ, new Integer(count));
     if (MAX_SESSION_SERVICE_REQ < count) {
-      LOG.warn("SessionServiceValidator.isValid() -- too many requests (" + count + 
+      LOG.warn("SessionServiceSecurity.check() -- too many requests (" + count + 
         ") made by this session to the session service API (MAX_SESSION_SERVICE_REQ = " + 
         MAX_SESSION_SERVICE_REQ + ")");
       return false;
     }
-
     return true;
-  }
-
+	}
 }
