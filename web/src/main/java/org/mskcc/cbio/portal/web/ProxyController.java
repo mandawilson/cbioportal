@@ -209,7 +209,7 @@ public class ProxyController
 		if (authentication != null && authentication.getPrincipal() instanceof User) {
 			body.put("userID", ((User) authentication.getPrincipal()).getUsername());
 		} else {
-	  	// for us if authentication.getPrincipal() is a String it is the Spring anonymousUser
+			// for us if authentication.getPrincipal() is a String it is the Spring anonymousUser
 			body.put("userID", "DEFAULT");
 		}
 		return restTemplate.exchange(uri, HttpMethod.POST,
