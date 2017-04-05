@@ -67,6 +67,7 @@
                         <th class="mut-header" alt="FACETS Copy Number"><b>FACETS Copy #</b></th>
                         <th class="mut-header" alt="FACETS Total Copy Number"><b>FACETS Total Copy #</b></th>
                         <th class="mut-header" alt="FACETS Minor Copy Number"><b>FACETS Minor Copy #</b></th>
+                        <th class="mut-header" alt="FACETS Best Guess for Mutant Copies"><b>FACETS Mutant Copies</b></th>
                         <th class="mut-header" alt="Percentile of mRNA expression of the mutated gene in this tumor comparing to the cohort"><b>mRNA Expr.</b></th>
                         <th class="mut-header" alt="Mutation frequency in cohort"><b>Cohort</b></th>
                         <th class="mut-header" alt="Mutation frequency in cBioPortal"><b>cBioPortal</b></th>

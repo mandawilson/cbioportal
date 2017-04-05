@@ -1359,6 +1359,65 @@
                             }
                         }
                     },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["guess_mutant_copies"] ],
+                        "bVisible": hasFACETS,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var ret = [];
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+									                  var refCount = mutations.getValue(source[0], 'ref-count')[caseIds[i]];
+									                  var altCount = mutations.getValue(source[0], 'alt-count')[caseIds[i]];
+                                    var purity = floatValueOrNA(mutations.getValue(source[0], 'purity'));
+                                    var totalCopyNumber = intValueOrNA(mutations.getValue(source[0], 'total-copy-number')[caseIds[i]]);
+
+									                  if (cbio.util.checkNullOrUndefined(refCount)
+                                        || cbio.util.checkNullOrUndefined(altCount)
+                                        || cbio.util.checkNullOrUndefined(purity)
+                                        || cbio.util.checkNullOrUndefined(totalCopyNumber)) {
+                                        continue;
+                                    }
+                                    if (!purity || purity === "NA"
+                                        || !totalCopyNumber || totalCopyNumber === "NA") {
+                                        ret.push("NA");
+                                    } else {
+                                        // (( allele fraction / purity ) * total # of copies) 
+                                        // rounded to nearest integer with a maximum of the total copy # and greater than zero
+                                        var alleleFreq = altCount / (altCount + refCount);  
+                                        ret.push(Math.max(1, Math.min(totalCopyNumber, Math.round((alleleFreq / purity) * totalCopyNumber))));
+                                    }
+                                }
+                                return ret.join(",");
+                            } else if (type==='sort') {
+									              var refCount = mutations.getValue(source[0], 'ref-count')[caseIds[0]];
+									              var altCount = mutations.getValue(source[0], 'alt-count')[caseIds[0]];
+                                var purity = floatValueOrNA(mutations.getValue(source[0], 'purity'));
+                                var totalCopyNumber = intValueOrNA(mutations.getValue(source[0], 'total-copy-number')[caseIds[0]]);
+
+									              if (cbio.util.checkNullOrUndefined(refCount)
+                                    || cbio.util.checkNullOrUndefined(altCount)
+                                    || cbio.util.checkNullOrUndefined(purity)
+                                    || cbio.util.checkNullOrUndefined(totalCopyNumber)
+                                    || !purity || purity === "NA"
+                                    || !totalCopyNumber || totalCopyNumber === "NA") {
+                                    return -1;
+                                }
+                                // (( allele fraction / purity ) * total # of copies) 
+                                // rounded to nearest integer with a maximum of the total copy # and greater than zero
+                                var alleleFreq = altCount / (altCount + refCount);  
+                                return Math.max(1, Math.min(totalCopyNumber, Math.round((alleleFreq / purity) * totalCopyNumber)));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
                     {// mrna
                         "aTargets": [ mutTableIndices['mrna'] ],
                         "bVisible": !mutations.colAllNull('mrna'),
