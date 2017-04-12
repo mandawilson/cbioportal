@@ -62,8 +62,15 @@ public class ProxyController
   public void setPDBDatabaseURL(String property) { this.pdbDatabaseURL = property; }
 
   private String oncokbURL;
-  @Value("${oncokb.url}")
-  public void setOncoKBURL(String property) { this.oncokbURL = property; }
+  @Value("${oncokb.url:http://oncokb.org/legacy-api/}")
+  public void setOncoKBURL(String property) {
+    // The annotation above can only prevent oncokb.api.url is not present in the property file.
+    // If user set the  oncokb.api.url to empty, we should also use the default OncoKB URL.
+    if (property.isEmpty()) {
+      property = "http://oncokb.org/legacy-api/";
+    }
+    this.oncokbURL = property;
+  }
 
   // This is a general proxy for future use.
   // Please modify and improve it as needed with your best expertise. The author does not have fully understanding
