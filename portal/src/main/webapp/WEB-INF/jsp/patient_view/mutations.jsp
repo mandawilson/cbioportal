@@ -1113,7 +1113,7 @@
                     },
                     {// FACETS 
                         "aTargets": [ mutTableIndices["total_copy_number"] ],
-                        "bVisible": hasFACETS,
+                        "bVisible": false,
                         "sClass": "right-align-td",
                         "asSorting": ["desc", "asc"],
                         "bSearchable": false,
@@ -1297,7 +1297,7 @@
                                     } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 3) {
                                         val = "AMP";
                                     }
-									caseIdsToTips.push([caseIds[i], generateFACETSCallTip(val, wgd, total_copy_number, minor_copy_number)]);
+									caseIdsToTips.push([caseIds[i], generateFACETSCallTip(val.toLowerCase(), wgd, total_copy_number, minor_copy_number)]);
                                 	if (type==='display') {
 										if (val!=="NA") {
 											val = "<b>"+val+"</b>";	
@@ -1317,7 +1317,7 @@
                     },
                     {// FACETS 
                         "aTargets": [ mutTableIndices["guess_mutant_copies"] ],
-                        "bVisible": hasFACETS,
+                        "bVisible": false,
                         "sClass": "right-align-td",
                         "asSorting": ["desc", "asc"],
                         "bSearchable": false,
@@ -1367,6 +1367,69 @@
                                 // rounded to nearest integer with a maximum of the total copy # and greater than zero
                                 var alleleFreq = altCount / (altCount + refCount);  
                                 return Math.max(1, Math.min(totalCopyNumber, Math.round((alleleFreq / purity) * totalCopyNumber)));
+                            } else if (type==='type') {
+                                return 0.0;
+                            } else {
+                                return 0.0;
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["mutant_over_total_copies"] ],
+                        "bVisible": hasFACETS,
+                        "sClass": "right-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var ret = [];
+                                var caseIdsToTips = [];
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+									                  var refCount = mutations.getValue(source[0], 'ref-count')[caseIds[i]];
+									                  var altCount = mutations.getValue(source[0], 'alt-count')[caseIds[i]];
+                                    var purity = floatValueOrNA(mutations.getValue(source[0], 'purity'));
+                                    var totalCopyNumber = intValueOrNA(mutations.getValue(source[0], 'total-copy-number')[caseIds[i]]);
+
+									                  if (cbio.util.checkNullOrUndefined(refCount)
+                                        || cbio.util.checkNullOrUndefined(altCount)
+                                        || cbio.util.checkNullOrUndefined(purity)
+                                        || cbio.util.checkNullOrUndefined(totalCopyNumber)) {
+                                        continue;
+                                    }
+                                    if (!purity || purity === "NA"
+                                        || !totalCopyNumber || totalCopyNumber === "NA") {
+										                    caseIdsToTips.push([caseIds[i], generateFACETSMutantsTip(totalCopyNumber, "NA")]);
+                                        ret.push("NA");
+                                    } else {
+                                        // (( allele fraction / purity ) * total # of copies) 
+                                        // rounded to nearest integer with a maximum of the total copy # and greater than zero
+                                        var alleleFreq = altCount / (altCount + refCount);  
+                                        mutants = Math.max(1, Math.min(totalCopyNumber, Math.round((alleleFreq / purity) * totalCopyNumber)))
+									                      caseIdsToTips.push([caseIds[i], generateFACETSMutantsTip(totalCopyNumber, mutants)]);
+                                        ret.push(mutants + "/" + totalCopyNumber);
+                                    }
+                                }
+								                return "<span class='"+table_id+"-facets-mutants' data-facets-mutants='"+JSON.stringify(caseIdsToTips)+"'>"+ret.join(",")+"</span>";
+                            } else if (type==='sort') {
+									              var refCount = mutations.getValue(source[0], 'ref-count')[caseIds[0]];
+									              var altCount = mutations.getValue(source[0], 'alt-count')[caseIds[0]];
+                                var purity = floatValueOrNA(mutations.getValue(source[0], 'purity'));
+                                var totalCopyNumber = intValueOrNA(mutations.getValue(source[0], 'total-copy-number')[caseIds[0]]);
+
+									              if (cbio.util.checkNullOrUndefined(refCount)
+                                    || cbio.util.checkNullOrUndefined(altCount)
+                                    || cbio.util.checkNullOrUndefined(purity)
+                                    || cbio.util.checkNullOrUndefined(totalCopyNumber)
+                                    || !purity || purity === "NA"
+                                    || !totalCopyNumber || totalCopyNumber === "NA") {
+                                    return -1;
+                                }
+                                // (( allele fraction / purity ) * total # of copies) 
+                                // rounded to nearest integer with a maximum of the total copy # and greater than zero
+                                var alleleFreq = altCount / (altCount + refCount);  
+                                return Math.max(1, Math.min(totalCopyNumber, Math.round((alleleFreq / purity) * totalCopyNumber))) + "/" + totalCopyNumber;
                             } else if (type==='type') {
                                 return 0.0;
                             } else {
@@ -1749,6 +1812,7 @@
                     }
 					if (hasFACETS) {
 						addCaseIdTooltip("."+table_id+"-facets-call","facets");
+						addMutantsTooltip("."+table_id+"-facets-mutants","facets-mutants");
 					}
                 },
                 "bPaginate": true,
@@ -1900,6 +1964,15 @@
 		return "<b>"+call+"</b> ("+wgd+" with a total copy number of "+total_copy_number+" and a minor copy number of "+minor_copy_number+")";
 	}
 
+	function generateFACETSMutantsTip(total_copy_number, mutants) {
+    mutants = valueOrNA(mutants);
+    total_copy_number = valueOrNA(total_copy_number);
+    if (mutants && mutants === 1) {
+		  return "<b>"+mutants+"</b> out of <b>"+total_copy_number+"</b> copies of this gene is mutated";
+    }
+		return "<b>"+mutants+"</b> out of <b>"+total_copy_number+"</b> copies of this gene are mutated";
+	}
+
 	function addCaseIdTooltip(div, dataRef) {
 		$(div).each(function() {
 			var calls = $(this).data(dataRef);
@@ -1929,6 +2002,37 @@
             });
 		});
 	}
+
+  function addMutantsTooltip(div, dataRef) {
+
+		$(div).each(function() {
+			var calls = $(this).data(dataRef);
+    		// tooltip
+            var arr = [];
+            calls.forEach(function(call){
+				if (caseIds.length === 1) {
+            		arr.push(call[1]);
+				} else {
+            		arr.push("<svg width='12' height='12' class='case-label-tip' alt='"+call[0]+"'></svg>&nbsp;"+call[1]);
+				}
+            });
+
+			var tip = arr.join("<br/>");
+				
+	        $(this).qtip({
+            	content: {text: tip},
+                events: {
+                    render: function(event, api) {
+                        plotCaseLabel('.case-label-tip', true, true);
+                    }
+                },
+                show: {event: "mouseover"},
+                hide: {fixed: true, delay: 10, event: "mouseout"},
+                style: { classes: 'qtip-light qtip-rounded' },
+                position: {my:'top left',at:'bottom center',viewport: $(window)}
+            });
+		});
+  }
 
     function plotFraction(div, mutations, dataRef) {
         $(div).each(function() {
