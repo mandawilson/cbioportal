@@ -1209,136 +1209,92 @@
                                     var major_copy_number = total_copy_number - minor_copy_number;
 									var val = "";
                                     if (wgd === "no WGD" && major_copy_number === 0 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "HOMDEL";
                                     } else if (wgd === "no WGD" && major_copy_number === 1 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "HETLOSS";
                                     } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "CNLOH";
                                     } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "CNLOH & GAIN";
                                     } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "CNLOH & GAIN";
                                     } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "AMP (LOH)";
                                     } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "AMP (LOH)";
                                     } else if (wgd === "no WGD" && major_copy_number === 1 && minor_copy_number === 1) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "DIPLOID";
                                     } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 1) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "GAIN";
                                     } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 1) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "GAIN";
                                     } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 1) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 1) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 1) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "TETRAPLOID";
                                     } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP (BALANCED)";
                                     } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 0 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "HOMDEL";
                                     } else if (wgd === "WGD" && major_copy_number === 1 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "LOSS BEFORE & AFTER";
+                                        val = "LOSS bf. & af. WGD";
                                     } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "LOSS BEFORE";
+                                        val = "LOSS bf. WGD";
                                     } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "CNLOH BEFORE & LOSS";
+                                        val = "CNLOH bf. WGD & LOSS";
                                     } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "CNLOH BEFORE";
+                                        val = "CNLOH bf. WGD";
                                     } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "CNLOH BEFORE & GAIN";
+                                        val = "CNLOH bf. WGD & GAIN";
                                     } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 0) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "AMP (LOH)";
                                     } else if (wgd === "WGD" && major_copy_number === 1 && minor_copy_number === 1) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "DOUBLE LOSS AFTER";
+                                        val = "DOUBLE LOSS af. WGD";
                                     } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 1) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "LOSS AFTER";
+                                        val = "LOSS af. WGD";
                                     } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 1) {
-                                        style = "color:blue;font-size:smaller;";
-                                        val = "CNLOH AFTER";
+                                        val = "CNLOH af. WGD";
                                     } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 1) {
-                                        style = "color:blue;font-size:smaller;";
                                         val = "LOSS & GAIN";
                                     } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 1) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 1) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "TETRAPLOID";
                                     } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "GAIN";
                                     } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 2) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP (BALANCED)";
                                     } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 3) {
-                                        style = "color:red;font-size:smaller;";
                                         val = "AMP";
                                     }
 									caseIdsToTips.push([caseIds[i], generateFACETSCallTip(val, wgd, total_copy_number, minor_copy_number)]);
@@ -1346,7 +1302,7 @@
 										if (val!=="NA") {
 											val = "<b>"+val+"</b>";	
 										}
-                                    	ret.push("<span style='"+style+"'>"+val+"</span>");
+                                    	ret.push("<span style='"+style+"'>"+val.toLowerCase()+"</span>");
                                 	} else {
                                     	return val; // return with 1st val
                                 	}
