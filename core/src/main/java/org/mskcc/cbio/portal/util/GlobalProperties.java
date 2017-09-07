@@ -135,6 +135,8 @@ public class GlobalProperties {
     public static final String ONCOKB_API_URL = "oncokb.api.url";
     public static final String SHOW_ONCOKB = "show.oncokb";
 
+    public static final String SHOW_COSMIC = "show.cosmic";
+
     private static String sessionServiceURL;
     @Value("${session.service.url:}") // default is empty string
     public void setSessionServiceURL(String property) { sessionServiceURL = property; }
@@ -780,6 +782,19 @@ public class GlobalProperties {
             return Boolean.parseBoolean(hotspot);
         }else{
             return false;
+        }
+    }
+
+    public static boolean showCosmic() {
+        String cosmic = properties.getProperty(SHOW_COSMIC);
+        if (cosmic == null) {
+            return true; // show cosmic by default
+        }
+        
+        if(!cosmic.isEmpty()) {
+            return Boolean.parseBoolean(cosmic);
+        } else {
+            return true; // empty, show cosmic by default
         }
     }
 

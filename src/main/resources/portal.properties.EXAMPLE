@@ -149,6 +149,9 @@ hotspots.url=http://cancerhotspots.org/api/
 # Enable Civic variant annotation (true, false)
 show.civic=false
 
+# Enable COSMIC (default true)
+show.cosmic=true
+
 # Link to My Cancer Genome. Please disable (set to false) when using cBioPortal with patient identifiable data due My Cancer Genome license restrictions.
 mycancergenome.show=true
 

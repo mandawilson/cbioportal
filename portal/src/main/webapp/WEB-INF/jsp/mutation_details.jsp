@@ -34,6 +34,7 @@
     boolean showMyCancerGenomeUrl = (Boolean) GlobalProperties.showMyCancerGenomeUrl();
     String oncokbGeneStatus = (String) GlobalProperties.getOncoKBGeneStatus();
     boolean showHotspot = (Boolean) GlobalProperties.showHotspot();
+    boolean showCosmic = (Boolean) GlobalProperties.showCosmic();
     boolean showCivic = (Boolean) GlobalProperties.showCivic();
     String civicUrl = (String) GlobalProperties.getCivicUrl();
     String userName = GlobalProperties.getAuthenticatedUserName();
@@ -80,6 +81,7 @@
 
     var oncokbGeneStatus = <%=oncokbGeneStatus%>;
     var showHotspot = <%=showHotspot%>;
+    var showCosmic = <%=showCosmic%>;
     var showCivic = <%=showCivic%>;
     var civicUrl = '<%=civicUrl%>';
     var userName = '<%=userName%>';
@@ -116,6 +118,10 @@
             "normalFreq", "tumorRefCount", "tumorAltCount", "normalRefCount",
             "normalAltCount", "igvLink", "mutationCount"
         ];
+        if (!showCosmic) {
+            // note this only works because we know we have exactly one instance in the array
+            columnOrder.splice( $.inArray("cosmic", columnOrder), 1 );
+        }
         var options = {
             el: "#mutation_details",
             data: {

@@ -95,6 +95,7 @@ String oncokbUrl = (String)GlobalProperties.getOncoKBApiUrl();
 String oncokbGeneStatus = (String)GlobalProperties.getOncoKBGeneStatus();
 
 boolean showHotspot = (Boolean) GlobalProperties.showHotspot();
+boolean showCosmic = (Boolean) GlobalProperties.showCosmic();
 
 boolean showCivic = (Boolean) GlobalProperties.showCivic();
 String civicUrl = (String) GlobalProperties.getCivicUrl();
@@ -359,6 +360,7 @@ var caseMetaData = {
 };
 var oncokbGeneStatus = <%=oncokbGeneStatus%>;
 var showHotspot = <%=showHotspot%>;
+var showCosmic = <%=showCosmic%>;
 var showCivic = <%=showCivic%>;
 var civicUrl = '<%=civicUrl%>';
 var userName = '<%=userName%>';
@@ -371,6 +373,12 @@ var mutTableIndices =
 		["id","case_ids","gene","aa", "annotation", "chr","start","end","ref","_var","validation","type",
 		 "tumor_freq","tumor_var_reads","tumor_ref_reads","norm_freq","norm_var_reads",
 		 "norm_ref_reads","bam","cna","mrna","altrate","pancan_mutations", "cosmic","ma","drug"];
+
+if (!showCosmic) {
+    // note this only works because we know we have exactly one instance in the array 
+    mutTableIndices.splice( $.inArray("cosmic", mutTableIndices), 1 ); 
+}
+
 mutTableIndices = cbio.util.arrayToAssociatedArrayIndices(mutTableIndices);
 
 $(document).ready(function(){

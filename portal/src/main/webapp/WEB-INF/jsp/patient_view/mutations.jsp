@@ -51,13 +51,25 @@
             data.push([mutEventIds[i]]);
         }
 
+
+        var sortOrder = (showCosmic ? [
+                                          [mutTableIndices["annotation"], 'asc'],
+                                          [mutTableIndices["cosmic"],'desc'],
+                                          [mutTableIndices["altrate"],'desc'], 
+                                          [mutTableIndices["gene"], 'asc']
+                                      ] : [
+                                          [mutTableIndices["annotation"], 'asc'],
+                                          [mutTableIndices["altrate"],'desc'],
+                                          [mutTableIndices["gene"], 'asc']
+                                      ]);
+
         var oTable = $("#"+table_id).dataTable( {
                 "sDom": sDom, // selectable columns
                 "oColVis": { "aiExclude": [ mutTableIndices["id"], mutTableIndices["pancan_mutations"] ] }, // always hide id column
                 "bJQueryUI": true,
                 "bDestroy": true,
                 "aaData": data,
-                "aoColumnDefs":[
+                "aoColumnDefs":Array.concat([
                     {// event id
                         "aTargets": [ mutTableIndices["id"] ],
                         "bVisible": false,
@@ -697,46 +709,6 @@
                         },
                         "asSorting": ["desc", "asc"]
                     },
-                    {// cosmic
-                        "aTargets": [ mutTableIndices["cosmic"] ],
-                        "sClass": "right-align-td",
-                        "asSorting": ["desc", "asc"],
-                        "bSearchable": false,
-                        "mDataProp": function(source,type,value) {
-                            if (type==='set') {
-                                return;
-                            } else if (type==='display') {
-                                var cosmic = mutations.getValue(source[0], 'cosmic');
-                                if (!cosmic) return "";
-                                var arr = [];
-                                var n = 0;
-                                cosmic.forEach(function(c) {
-                                    arr.push("<td>"+c[0]+"</td><td>"+c[1]+"</td><td>"+c[2]+"</td>");
-                                    n += c[2];
-                                });
-                                if (n===0) return "";
-                                var tip = '<b>'+n+' occurrences of '+mutations.getValue(source[0], 'key')
-                                    +' mutations in COSMIC</b><br/><table class="'+table_id
-                                    +'-cosmic-table uninitialized"><thead><th>COSMIC ID</th><th>Protein Change</th><th>Occurrence</th></thead><tbody><tr>'
-                                    +arr.join('</tr><tr>')+'</tr></tbody></table>';
-                                return  "<span class='"+table_id
-                                                +"-cosmic-tip' alt='"+tip+"'>"+n+"</span>";
-                            } else if (type==='sort') {
-                                var cosmic = mutations.getValue(source[0], 'cosmic');
-                                var n = 0;
-                                if (cosmic) {
-                                    cosmic.forEach(function(c) {
-                                        n += c[2];
-                                    });
-                                }
-                                return n;
-                            } else if (type==='type') {
-                                return 0;
-                            } else {
-                                return mutations.getValue(source[0], 'cosmic');
-                            }
-                        }
-                    },
                     {// drugs
                         "aTargets": [ mutTableIndices["drug"] ],
                         "sClass": "center-align-td",
@@ -833,7 +805,47 @@
                         },
                         "asSorting": ["desc", "asc"]
                     }
-                ],
+                ], (!showCosmic ? [/* we don't want to show cosmic so concat with an empty array and column will not be included */] : 
+            [{// cosmic
+                "aTargets": [ mutTableIndices["cosmic"] ],
+                "sClass": "right-align-td",
+                "asSorting": ["desc", "asc"],
+                "bSearchable": false,
+                "mDataProp": function(source,type,value) {
+                    if (type==='set') {
+                        return;
+                    } else if (type==='display') {
+                        var cosmic = mutations.getValue(source[0], 'cosmic');
+                        if (!cosmic) return "";
+                        var arr = [];
+                        var n = 0;
+                        cosmic.forEach(function(c) {
+                            arr.push("<td>"+c[0]+"</td><td>"+c[1]+"</td><td>"+c[2]+"</td>");
+                            n += c[2];
+                        });
+                        if (n===0) return "";
+                        var tip = '<b>'+n+' occurrences of '+mutations.getValue(source[0], 'key')
+                            +' mutations in COSMIC</b><br/><table class="'+table_id
+                            +'-cosmic-table uninitialized"><thead><th>COSMIC ID</th><th>Protein Change</th><th>Occurrence</th></thead><tbody><tr>'
+                            +arr.join('</tr><tr>')+'</tr></tbody></table>';
+                        return  "<span class='"+table_id
+                                        +"-cosmic-tip' alt='"+tip+"'>"+n+"</span>";
+                    } else if (type==='sort') {
+                        var cosmic = mutations.getValue(source[0], 'cosmic');
+                        var n = 0;
+                        if (cosmic) {
+                            cosmic.forEach(function(c) {
+                                n += c[2];
+                            });
+                        }
+                        return n;
+                    } else if (type==='type') {
+                        return 0;
+                    } else {
+                        return mutations.getValue(source[0], 'cosmic');
+                    }
+                }
+            }])),
                 "fnDrawCallback": function( oSettings ) {
                     if (caseIds.length>1) {
                         plotCaseLabel('.'+table_id+'-case-label',true);
@@ -848,7 +860,9 @@
                         addNoteTooltip('.'+table_id+'-hotspot', cbio.util.getHotSpotDesc(true));
                     }
                     addDrugsTooltip("."+table_id+"-drug-tip", 'top right', 'bottom center');
-                    addCosmicTooltip(table_id);
+                    if (showCosmic) {
+                        addCosmicTooltip(table_id);
+                    }
                     listenToBamIgvClick(".igv-link");
                     //drawPanCanThumbnails(this);
                     if(mutationOncokbInstance){
@@ -859,7 +873,7 @@
                 },
                 "bPaginate": true,
                 "sPaginationType": "two_button",
-                "aaSorting": [[mutTableIndices["annotation"], 'asc'], [mutTableIndices["cosmic"],'desc'],[mutTableIndices["altrate"],'desc'], [mutTableIndices["gene"], 'asc']],
+                "aaSorting": sortOrder,
                 "oLanguage": {
                     "sInfo": "&nbsp;&nbsp;(_START_ to _END_ of _TOTAL_)&nbsp;&nbsp;",
                     "sInfoFiltered": "",
@@ -868,7 +882,7 @@
                 },
                 "iDisplayLength": iDisplayLength,
                 "aLengthMenu": [[5,10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "All"]]
-        } );
+        });
 
         oTable.css("width","100%");
         addNoteTooltip("#"+table_id+" th.mut-header");
@@ -1077,8 +1091,12 @@
                     <ul><li>either annotated cancer genes</li>\n\
                     <li>or recurrently mutated, namely\n\
                         <ul><li>MutSig Q < 0.05, if MutSig results are available</li>\n\
-                        <li>otherwise, mutated in > 5% of samples in the study with &ge; 50 samples</li></ul> </li>\n\
-                    <li>or with > 5 overlapping entries in COSMIC.</li></ul>' alt='help' />";
+                        <li>otherwise, mutated in > 5% of samples in the study with &ge; 50 samples</li>\n\
+                        </ul> </li>";
+                        if (showCosmic) {
+                            mutationSummary += "<li>or with > 5 overlapping entries in COSMIC.</li>";
+                        }
+                        mutationSummary += "</ul>' alt='help' />";
                     }
                     $('.mutation-summary-table-name').html(mutationSummary);
                     $('#mutations-summary-help').qtip({
@@ -1184,17 +1202,24 @@
                 }
             }
 
-            var ncosmic = 0;
-            var cosmicI= cosmic[i];
-            if (cosmicI) {
-                var lenI = cosmicI.length;
-                for(var j=0; j<lenI && ncosmic<patient_view_cosmic_threhold; j++) {
-                    ncosmic += cosmicI[j][2];
+            if (showCosmic) {
+                var ncosmic = 0;
+                var cosmicI= cosmic[i];
+                if (cosmicI) {
+                    var lenI = cosmicI.length;
+                    for(var j=0; j<lenI && ncosmic<patient_view_cosmic_threhold; j++) {
+                        ncosmic += cosmicI[j][2];
+                    }
+                    if (ncosmic>=patient_view_cosmic_threhold) {
+                        overview.push(true);
+                        continue;
+                    }
                 }
-                if (ncosmic>=patient_view_cosmic_threhold) {
-                    overview.push(true);
-                    continue;
-                }
+            } else {
+                // TODO what do we do here? is there so other measure for what we want to include?
+                // right now if we don't have cosmic we are not filtering at all
+                overview.push(true);
+                continue;
             }
 
             overview.push(false);
