@@ -643,8 +643,51 @@
                         "asSorting": ["desc", "asc"]
                     },
                     {// FACETS 
-                        "aTargets": [ mutTableIndices["ccf_m_copies"] ],
+                        "aTargets": [ mutTableIndices["clonal"] ],
                         "bVisible": hasFACETS,
+                        "sClass": "center-align-td",
+                        "asSorting": ["desc", "asc"],
+                        "bSearchable": false,
+                        "mDataProp": function(source,type,value) {
+                            if (type==='set') {
+                                return;
+                            } else if (type==='display') {
+                                var caseIdsToTips = [];
+                                var ret = [];
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+                                    var mCopies = mutations.getValue(source[0], 'ccf-m-copies')[caseIds[i]];
+                                    var mCopiesUpper = mutations.getValue(source[0], 'ccf-m-copies-upper')[caseIds[i]];
+                                    var mCopiesLower = mutations.getValue(source[0], 'ccf-m-copies-upper')[caseIds[i]];
+                                    if (cbio.util.checkNullOrUndefined(mCopiesUpper)) {
+                                        continue;
+                                    }
+                                    var val = floatValueOrNA(mCopiesUpper);
+                                    caseIdsToTips.push([caseIds[i], "CCF: " + floatValueOrNA(mCopies)]);
+                                    if (val && val !== "NA") {
+                                        if (val == 1) {
+                                            val = "T";
+                                        } else {
+                                            val = "F";
+                                        }
+                                    } else {
+                                        val = "NA";
+                                    }
+                                    ret.push(val);
+                                }
+                                return "<span class='"+table_id+"-clonal-call' data-clonal='"+JSON.stringify(caseIdsToTips)+"'>"+ret.join(",")+"</span>";
+                            } else if (type==='sort') {
+                                var val = mutations.getValue(source[0], 'ccf-m-copies-upper')[caseIds[0]];
+                                return val;
+                            } else if (type==='type') {
+                                return "";
+                            } else {
+                                return "";
+                            }
+                        }
+                    },
+                    {// FACETS 
+                        "aTargets": [ mutTableIndices["ccf_m_copies"] ],
+                        "bVisible": false,
                         "sClass": "center-align-td",
                         "asSorting": ["desc", "asc"],
                         "bSearchable": false,
@@ -1085,21 +1128,139 @@
                             if (type==='set') {
                                 return;
                             } else if (type==='display') {
-                                var cna = mutations.getValue(source[0], 'cna');
-                                switch (cna) {
-                                    case "-2": return "<span style='color:blue;' class='"
-                                           +table_id+"-tip' alt='Deep deletion'><b>DeepDel</b></span>";
-                                    case "-1": return "<span style='color:blue;font-size:smaller;' class='"
-                                           +table_id+"-tip' alt='Shallow deletion'><b>ShallowDel</b></span>";
-                                    case "0": return "<span style='color:black;font-size:xx-small;' class='"
-                                           +table_id+"-tip' alt='Diploid / normal'>Diploid</span>";
-                                    case "1": return "<span style='color:red;font-size:smaller;' class='"
-                                           +table_id+"-tip' alt='Low-level gain'><b>Gain</b></span>";
-                                    case "2": return "<span style='color:red;' class='"
-                                           +table_id+"-tip' alt='High-level amplification'><b>Amp</b></span>";
-                                    default: return "<span style='color:gray;font-size:xx-small;' class='"
-                                           +table_id+"-tip' alt='CNA data is not available for this gene.'>NA</span>";
+                                var caseIdsToTips = [];
+								var ret = [];
+                                var cnas = mutations.getValue(source[0], 'cna');
+                                if (cnas == null) {
+                                    return "<span style='color:gray;font-size:xx-small;' class='"
+                                               +table_id+"-tip'>NA</span>";
                                 }
+                                for (var i=0, n=caseIds.length; i<n; i++) {
+                                    var wgd = clinicalDataMap[caseIds[i]]["FACETS_WGD"];
+                                    var minor_copy_number = intValueOrNA(mutations.getValue(source[0], 'minor-copy-number')[caseIds[i]]);
+                                    var total_copy_number = intValueOrNA(mutations.getValue(source[0], 'total-copy-number')[caseIds[i]]);
+                                    var cna = cnas[i];
+                                    switch (cna) {
+                                        case "-2": ret.push("<span style='color:blue;' class='"
+                                               +table_id+"-tip'><b>DeepDel</b></span>");
+                                        case "-1": ret.push("<span style='color:blue;font-size:smaller;' class='"
+                                               +table_id+"-tip'><b>ShallowDel</b></span>");
+                                        case "0": ret.push("<span style='color:black;font-size:xx-small;' class='"
+                                               +table_id+"-tip'>Diploid</span>");
+                                        case "1": ret.push("<span style='color:red;font-size:smaller;' class='"
+                                               +table_id+"-tip'><b>Gain</b></span>");
+                                        case "2": ret.push("<span style='color:red;' class='"
+                                               +table_id+"-tip'><b>Amp</b></span>");
+                                        default: ret.push("<span style='color:gray;font-size:xx-small;' class='"
+                                               +table_id+"-tip'>NA</span>");
+                                    }
+                                    if (cbio.util.checkNullOrUndefined(cna) 
+                                        || cbio.util.checkNullOrUndefined(minor_copy_number) 
+                                        || cbio.util.checkNullOrUndefined(total_copy_number)) {
+										continue;
+									}
+                                    var style = "color:black;font-size:xx-small;";
+									if (minor_copy_number === "NA" || total_copy_number === "NA") {
+										caseIdsToTips.push([caseIds[i], generateFACETSCallTip("NA", wgd, total_copy_number, minor_copy_number)]);
+                                        continue;
+                                    }
+                                    var major_copy_number = total_copy_number - minor_copy_number;
+									var val = "";
+                                    if (wgd === "no WGD" && major_copy_number === 0 && minor_copy_number === 0) {
+                                        val = "HOMDEL";
+                                    } else if (wgd === "no WGD" && major_copy_number === 1 && minor_copy_number === 0) {
+                                        val = "HETLOSS";
+                                    } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 0) {
+                                        val = "CNLOH";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 0) {
+                                        val = "CNLOH & GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 0) {
+                                        val = "CNLOH & GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 0) {
+                                        val = "AMP (LOH)";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 0) {
+                                        val = "AMP (LOH)";
+                                    } else if (wgd === "no WGD" && major_copy_number === 1 && minor_copy_number === 1) {
+                                        val = "DIPLOID";
+                                    } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 1) {
+                                        val = "GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 1) {
+                                        val = "GAIN";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 1) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 1) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 1) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 2 && minor_copy_number === 2) {
+                                        val = "TETRAPLOID";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 2) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 2) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 2) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 2) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 3 && minor_copy_number === 3) {
+                                        val = "AMP (BALANCED)";
+                                    } else if (wgd === "no WGD" && major_copy_number === 4 && minor_copy_number === 3) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 5 && minor_copy_number === 3) {
+                                        val = "AMP";
+                                    } else if (wgd === "no WGD" && major_copy_number === 6 && minor_copy_number === 3) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 0 && minor_copy_number === 0) {
+                                        val = "HOMDEL";
+                                    } else if (wgd === "WGD" && major_copy_number === 1 && minor_copy_number === 0) {
+                                        val = "LOSS before & after WGD";
+                                    } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 0) {
+                                        val = "LOSS before WGD";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 0) {
+                                        val = "CNLOH before WGD & LOSS";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 0) {
+                                        val = "CNLOH before WGD";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 0) {
+                                        val = "CNLOH before WGD & GAIN";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 0) {
+                                        val = "AMP (LOH)";
+                                    } else if (wgd === "WGD" && major_copy_number === 1 && minor_copy_number === 1) {
+                                        val = "DOUBLE LOSS after WGD";
+                                    } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 1) {
+                                        val = "LOSS after WGD";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 1) {
+                                        val = "CNLOH after WGD";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 1) {
+                                        val = "LOSS & GAIN";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 1) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 1) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 2 && minor_copy_number === 2) {
+                                        val = "TETRAPLOID";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 2) {
+                                        val = "GAIN";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 2) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 2) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 2) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 3 && minor_copy_number === 3) {
+                                        val = "AMP (BALANCED)";
+                                    } else if (wgd === "WGD" && major_copy_number === 4 && minor_copy_number === 3) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 5 && minor_copy_number === 3) {
+                                        val = "AMP";
+                                    } else if (wgd === "WGD" && major_copy_number === 6 && minor_copy_number === 3) {
+                                        val = "AMP";
+                                    }
+									caseIdsToTips.push([caseIds[i], generateFACETSCallTip(val.toLowerCase(), wgd, total_copy_number, minor_copy_number)]);
+								    if (val!=="NA") {
+									    val = "<b>"+val+"</b>";	
+								    }
+								}
+								return "<span class='"+table_id+"-cna-call' data-cna='"+JSON.stringify(caseIdsToTips)+"'>"+ret.join(",")+"</span>";
                             } else if (type==='sort') {
                                 var cna = mutations.getValue(source[0], 'cna');
                                 return cna?cna:0;
@@ -1177,7 +1338,7 @@
                     },
                     {// FACETS
                         "aTargets": [ mutTableIndices["facets_copy_number"] ],
-                        "bVisible": hasFACETS,
+                        "bVisible": false,
                         "sClass": "right-align-td",
                         "asSorting": ["desc", "asc"],
                         "bSearchable": false,
@@ -1812,6 +1973,8 @@
                     }
 					if (hasFACETS) {
 						addCaseIdTooltip("."+table_id+"-facets-call","facets");
+						addCaseIdTooltip("."+table_id+"-cna-call","cna");
+						addCaseIdTooltip("."+table_id+"-clonal-call","clonal");
 						addMutantsTooltip("."+table_id+"-facets-mutants","facets-mutants");
 					}
                 },

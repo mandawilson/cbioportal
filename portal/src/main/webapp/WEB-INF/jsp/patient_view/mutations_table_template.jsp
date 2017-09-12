@@ -51,6 +51,7 @@
                         <th class="mut-header" alt="Variant allele frequency in the normal sample"><b>Allele<br/>Freq (N)</b></th>
                         <th class="mut-header" alt="Variant allele read count in the normal sample"><b>Variant<br/>Reads (N)</b></th>
                         <th class="mut-header" alt="Reference allele read count in the normal sample"><b>Ref<br/>Reads (N)</b></th>
+                        <th class="mut-header" alt="FACETS Clonal"><b>Clonal</b></th>
                         <th class="mut-header" alt="FACETS Cancer Cell Fraction M Copies"><b>CCF</b></th>
                         <th class="mut-header" alt="FACETS Cancer Cell Fraction M Copies Lower"><b>CCF M Copies Lower</b></th>
                         <th class="mut-header" alt="FACETS Cancer Cell Fraction M Copies Upper"><b>CCF M Copies Upper</b></th>

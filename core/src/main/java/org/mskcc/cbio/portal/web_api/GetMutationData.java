@@ -214,6 +214,7 @@ public class GetMutationData {
 					buf.append(mutation.getMinorCopyNumber());
 					buf.append(mutation.getPurity());
 					buf.append(mutation.getPloidy());
+					buf.append(mutation.getCcfMCopiesUpper() == 1);
 					buf.append(mutation.getCcfMCopies());
 					buf.append(mutation.getCcfMCopiesLower());
 					buf.append(mutation.getCcfMCopiesUpper());
@@ -277,6 +278,7 @@ public class GetMutationData {
 		buf.append("minor_copy_number").append(TAB);
 		buf.append("purity").append(TAB);
 		buf.append("ploidy").append(TAB);
+		buf.append("clonal").append(TAB);
 		buf.append("ccf_m_copies").append(TAB);
 		buf.append("ccf_m_copies_lower").append(TAB);
 		buf.append("ccf_m_copies_upper").append(TAB);

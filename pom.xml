@@ -133,10 +133,10 @@
 
 	<db.test.driver>com.mysql.jdbc.Driver</db.test.driver>
     <!-- For MySQL < 5.5 change 'default_storage_engine' to 'storage_engine' -->
-	<db.test.url>jdbc:mysql://127.0.0.1:3306/manda_test?sessionVariables=storage_engine=InnoDB</db.test.url>
+  <db.test.url><![CDATA[jdbc:mysql://127.0.0.1:23306/cgds_facets_test?sessionVariables=default_storage_engine=InnoDB&protocol=tcp]]></db.test.url>
     <db.test.username></db.test.username>
     <db.test.password></db.test.password>
-    
+
     <!--For tomcat instances, the scope to tomcat catalina lib should be provided. this prop is used in portal module.-->
     <tomcat.catalina.scope>provided</tomcat.catalina.scope>
 
