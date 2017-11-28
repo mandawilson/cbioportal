@@ -70,6 +70,7 @@ public final class DaoCancerStudy {
 
     public static synchronized void reCacheAll() {
         System.out.println("Recaching... ");
+        System.out.println("Stack trace:\n" + Arrays.toString(Thread.currentThread().getStackTrace()));
         DaoCancerStudy.reCache();
         DaoGeneticProfile.reCache();
         DaoPatient.reCache();
