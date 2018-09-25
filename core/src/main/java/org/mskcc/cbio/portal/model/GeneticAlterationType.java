@@ -32,10 +32,12 @@
 
 package org.mskcc.cbio.portal.model;
 
+import java.io.Serializable;
+
 /**
  * Class for genetic alteration type
  */
-public class GeneticAlterationType {
+public class GeneticAlterationType implements Serializable {
     public static final String HOMOZYGOUS_DELETION = "-2";
     public static final String PARTIAL_DELETION = "-1.5";
     public static final String HEMIZYGOUS_DELETION = "-1";
