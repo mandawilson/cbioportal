@@ -262,3 +262,6 @@ ehcache.RepositoryCache.maxBytesLocalDiskUnits=MB
 # MatchMiner AWS url
 matchminer.url=
 matchminer.token=
+
+# Enable cache statistics endpoint for EHCache monitoring
+cache.statistics.enabled=false
