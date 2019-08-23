@@ -715,3 +715,25 @@ UPDATE `cancer_study`
     INNER JOIN `mutation_event` ON `mutation`.MUTATION_EVENT_ID = `mutation_event`.MUTATION_EVENT_ID
 SET `cancer_study`.REFERENCE_GENOME_ID = IF(`mutation_event`.NCBI_BUILD in ('37', 'hg19','GRCh37'), 1, 2);
 UPDATE `info` SET `DB_SCHEMA_VERSION`="2.11.0";
+
+##version: 2.12.0
+ALTER TABLE `mutation` ADD COLUMN ASCN_ID bigint(20) DEFAULT NULL;
+ALTER TABLE `mutation` ADD CONSTRAINT UNIQUE KEY (`ASCN_ID`); 
+ALTER TABLE `mutation` ADD COLUMN ANNOTATION_JSON JSON DEFAULT NULL;
+-- ========================== new ascn table =============================================
+CREATE TABLE `allele_specific_copy_number` (
+    `ASCN_ID` bigint(20) NOT NULL auto_increment,
+    `ASCN_INTEGER_COPY_NUMBER` int DEFAULT NULL,
+    `ASCN_METHOD` varchar(24) NOT NULL,
+    `CCF_M_COPIES_UPPER` float DEFAULT NULL,
+    `CCF_M_COPIES` float DEFAULT NULL,
+    `CLONAL` boolean DEFAULT NULL,
+    `MINOR_COPY_NUMBER` int DEFAULT NULL,
+    `MUTANT_COPIES` int DEFAULT NULL,
+    `TOTAL_COPY_NUMBER` int DEFAULT NULL,
+    PRIMARY KEY (`ASCN_ID`),
+    FOREIGN KEY (`ASCN_ID`) REFERENCES `mutation` (`ASCN_ID`) ON DELETE CASCADE
+);
+
+UPDATE `info` SET `DB_SCHEMA_VERSION`="2.12.0";
+-- ========================== end of ascn table =============================================
