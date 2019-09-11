@@ -166,6 +166,12 @@
         allele_specific_copy_number.TOTAL_COPY_NUMBER AS "${prefix}totalCopyNumber"
     </sql>
 
+    <sql id="includeAlleleSpecificCopyNumber">
+        LEFT JOIN allele_specific_copy_number ON mutation.MUTATION_EVENT_ID = allele_specific_copy_number.MUTATION_EVENT_ID
+        AND mutation.GENETIC_PROFILE_ID = allele_specific_copy_number.GENETIC_PROFILE_ID
+        AND mutation.SAMPLE_ID = allele_specific_copy_number.SAMPLE_ID
+    </sql>
+
     <select id="getMutationsBySampleListId" resultType="org.cbioportal.model.Mutation">
         SELECT
         <include refid="select"/>
@@ -175,9 +181,7 @@
         </if>
         <if test="projection == 'DETAILED'">
             INNER JOIN gene ON mutation.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
-            LEFT JOIN allele_specific_copy_number ON mutation.MUTATION_EVENT_ID = allele_specific_copy_number.MUTATION_EVENT_ID
-            AND mutation.GENETIC_PROFILE_ID = allele_specific_copy_number.GENETIC_PROFILE_ID
-            AND mutation.SAMPLE_ID = allele_specific_copy_number.SAMPLE_ID
+            <include refid="includeAlleleSpecificCopyNumber"/>
         </if>
         <include refid="whereBySampleListId"/>
         <if test="sortBy != null and projection != 'ID'">
@@ -208,6 +212,7 @@
         </if>
         <if test="projection == 'DETAILED'">
             INNER JOIN gene ON mutation.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+            <include refid="includeAlleleSpecificCopyNumber"/>
         </if>
         <include refid="whereInMultipleMolecularProfiles"/>
         <if test="sortBy != null and projection != 'ID'">
@@ -238,6 +243,7 @@
         </if>
         <if test="projection == 'DETAILED'">
             INNER JOIN gene ON mutation.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+            <include refid="includeAlleleSpecificCopyNumber"/>
         </if>
         <include refid="where"/>
         <if test="sortBy != null and projection != 'ID'">
