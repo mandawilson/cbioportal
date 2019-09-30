@@ -32,6 +32,7 @@
 
 package org.cbioportal.persistence.util;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
@@ -48,6 +49,7 @@ import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.ehcache.impl.config.persistence.DefaultPersistenceConfiguration;
 
 public class CustomEhCachingProvider extends EhcacheCachingProvider {
 
@@ -84,34 +86,22 @@ public class CustomEhCachingProvider extends EhcacheCachingProvider {
          try {
             if (cacheEnabled != null && cacheEnabled) {
                 LOG.info("Caching is enabled, using '" + xmlConfigurationFile + "' for configuration");
-
-/*
-    1. We cannot create a cache manager from an XML file that contains ${property.name}. So we cannot create a cache manager and then modify
- it or use it as a template.
-    2. We cannot have an XML file with no ${property.name} that we load with defaults and then modify the defaults.  I don't think we have access
-to things like the cache size, and the directory would likely be created right away.
-*/
-
                 XmlConfiguration xmlConfiguration = new XmlConfiguration(getClass().getResource(xmlConfigurationFile)); 
-                LOG.info("XmlConfiguration: " + xmlConfiguration);
-                // TODO make StaticRepositoryCacheOne and GeneralRepositoryCache strings variables
-                LOG.info("xmlConfiguration.newCacheConfigurationBuilderFromTemplate(\"GeneralRepositoryCache\", Object.class, Object.class, ResourcePoolsBuilder.newResourcePoolsBuilder().heap(2, MemoryUnit.B)): " + xmlConfiguration.newCacheConfigurationBuilderFromTemplate("GeneralRepositoryCache", Object.class, Object.class, ResourcePoolsBuilder.newResourcePoolsBuilder().heap(2, MemoryUnit.B)));
-                CacheConfiguration<Object, Object> generalRepositoryCacheConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("GeneralRepositoryCache", Object.class, Object.class, ResourcePoolsBuilder.newResourcePoolsBuilder().heap(2, MemoryUnit.B)).build();
-                CacheConfiguration<Object, Object> staticRepositoryCacheOneConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("StaticRepositoryCacheOne", Object.class, Object.class, ResourcePoolsBuilder.newResourcePoolsBuilder().heap(2, MemoryUnit.B)).build(); 
+                // initilize configurations specific to each individual cache (by template)
+                // to add new cache - create cache configuration with its own resource pool + template
+                CacheConfiguration<Object, Object> generalRepositoryCacheConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", Object.class, Object.class, ResourcePoolsBuilder.newResourcePoolsBuilder().disk(generalRepositoryCacheMaxMegaBytesLocalDisk, MemoryUnit.MB).heap(generalRepositoryCacheMaxMegaBytes, MemoryUnit.MB)).withSizeOfMaxObjectGraph(Long.MAX_VALUE).withSizeOfMaxObjectSize(Long.MAX_VALUE, MemoryUnit.B).build();
+                CacheConfiguration<Object, Object> staticRepositoryCacheOneConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", Object.class, Object.class, ResourcePoolsBuilder.newResourcePoolsBuilder().disk(staticRepositoryCacheOneMaxMegaBytesLocalDisk, MemoryUnit.MB).heap(staticRepositoryCacheOneMaxMegaBytes, MemoryUnit.MB)).withSizeOfMaxObjectGraph(Long.MAX_VALUE).withSizeOfMaxObjectSize(Long.MAX_VALUE, MemoryUnit.B).build(); 
 
-                // TODO can we also modify the persistance path? - See: Property replacement in XML configuration files in http://www.ehcache.org/documentation/3.6/xml.html
-                // I don't think the properties will be replaced with the java system properties
-
+                // places caches in a map which will be used to create cache manager
                 Map<String, CacheConfiguration<?, ?>> caches = new HashMap<>();
                 caches.put("GeneralRepositoryCache", generalRepositoryCacheConfiguration);
                 caches.put("StaticRepositoryCacheOne", staticRepositoryCacheOneConfiguration);
-
-                Configuration configuration = new DefaultConfiguration(caches, this.getDefaultClassLoader());
-
+                
+                Configuration configuration = new DefaultConfiguration(caches, this.getDefaultClassLoader(), new DefaultPersistenceConfiguration(new File(persistencePath)));
                 toReturn = this.getCacheManager(this.getDefaultURI(), configuration);
 
-                toReturn.enableStatistics("GeneralRepositoryCache", statisticsEnabled);
-                toReturn.enableStatistics("StaticRepositoryCacheOne", statisticsEnabled);
+                toReturn.enableManagement("GeneralRepositoryCache", true);
+                toReturn.enableManagement("StaticRepositoryCacheOne", true);
             } else {
                 LOG.info("Caching is disabled");
                 // we can not really disable caching,
