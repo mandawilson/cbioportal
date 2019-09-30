@@ -19,7 +19,7 @@
       <ehcache:max-object-size>9223372036854775807</ehcache:max-object-size><!-- using Long.MAX_VALUE -->
     </ehcache:heap-store>
 
-    <ehcache:cache alias="GeneralRepositoryCache">
+    <ehcache:cache-template name="GeneralRepositoryCache">
       <ehcache:expiry>
         <ehcache:none></ehcache:none>
       </ehcache:expiry>
@@ -39,9 +39,9 @@
         <ehcache:heap unit="MB">${ehcache.general_repository_cache.max_mega_bytes_heap}</ehcache:heap><!-- remove if using a disk-only cache -->
         <ehcache:disk unit="MB" persistent="false">${ehcache.general_repository_cache.max_mega_bytes_local_disk}</ehcache:disk><!-- remove if using a heap-only cache -->
       </ehcache:resources>
-    </ehcache:cache>
+    </ehcache:cache-template>
 
-    <ehcache:cache alias="StaticRepositoryCacheOne">
+    <ehcache:cache-template name="StaticRepositoryCacheOne">
       <ehcache:expiry>
         <ehcache:none></ehcache:none>
       </ehcache:expiry>
@@ -61,6 +61,6 @@
         <ehcache:heap unit="MB">${ehcache.static_repository_cache_one.max_mega_bytes_heap}</ehcache:heap><!-- remove if using a disk-only cache -->
         <ehcache:disk unit="MB" persistent="false">${ehcache.static_repository_cache_one.max_mega_bytes_local_disk}</ehcache:disk><!-- remove if using a heap-only cache -->
       </ehcache:resources>
-    </ehcache:cache>
+    </ehcache:cache-template>
 
 </ehcache:config>
