@@ -49,7 +49,9 @@ import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.ehcache.impl.config.persistence.DefaultPersistenceConfiguration;
+import org.cbioportal.persistence.CacheEnabledConfig;
 
 public class CustomEhCachingProvider extends EhcacheCachingProvider {
 
@@ -58,8 +60,8 @@ public class CustomEhCachingProvider extends EhcacheCachingProvider {
     @Value("${ehcache.xml_configuration:/ehcache.xml}")
     private String xmlConfigurationFile;
 
-    @Value("${ehcache.cache_enabled:false}")
-    private Boolean cacheEnabled;
+    @Value("${ehcache.cache_type:none}")
+    private String cacheType;
 
     @Value("${ehcache.statistics_enabled:false}")
     private Boolean statisticsEnabled;
@@ -70,7 +72,7 @@ public class CustomEhCachingProvider extends EhcacheCachingProvider {
     @Value("${ehcache.static_repository_cache_one.max_mega_bytes_heap:30}")
     private Integer staticRepositoryCacheOneMaxMegaBytes;
 
-    @Value("${ehcache.persistence_path:null}")
+    @Value("${ehcache.persistence_path:/tmp/}")
     private String persistencePath;
 
     @Value("${ehcache.general_repository_cache.max_mega_bytes_local_disk:4096}")
@@ -83,25 +85,26 @@ public class CustomEhCachingProvider extends EhcacheCachingProvider {
     public CacheManager getCacheManager() {
 
         CacheManager toReturn = null;
-         try {
-            if (cacheEnabled != null && cacheEnabled) {
+        try {
+            if (CacheEnabledConfig.parseCacheType(cacheType)) {
                 LOG.info("Caching is enabled, using '" + xmlConfigurationFile + "' for configuration");
                 XmlConfiguration xmlConfiguration = new XmlConfiguration(getClass().getResource(xmlConfigurationFile));
 
                 // initilize configurations specific to each individual cache (by template)
                 // to add new cache - create cache configuration with its own resource pool + template
-                ResourcePoolsBuilder generalRepositoryCacheResourcePoolsBuilder = ResourcePoolsBuilder.newResourcePoolsBuilder().heap(generalRepositoryCacheMaxMegaBytes, MemoryUnit.MB);
-                ResourcePoolsBuilder staticRepositoryCacheOneResourcePoolsBuilder = ResourcePoolsBuilder.newResourcePoolsBuilder().heap(staticRepositoryCacheOneMaxMegaBytes, MemoryUnit.MB);
-
-                // set up disk resources if we have persistence path
-                File persistenceFile = null;
-                if (persistencePath != null) {
-                    persistenceFile = new File(persistencePath);
-                    if (persistenceFile.exists()) {
-                        // set up a persistence cache as well
-                        generalRepositoryCacheResourcePoolsBuilder = generalRepositoryCacheResourcePoolsBuilder.disk(generalRepositoryCacheMaxMegaBytesLocalDisk, MemoryUnit.MB);
-                        staticRepositoryCacheOneResourcePoolsBuilder = staticRepositoryCacheOneResourcePoolsBuilder.disk(staticRepositoryCacheOneMaxMegaBytesLocalDisk, MemoryUnit.MB);
-                    }
+                ResourcePoolsBuilder generalRepositoryCacheResourcePoolsBuilder = ResourcePoolsBuilder.newResourcePoolsBuilder();
+                ResourcePoolsBuilder staticRepositoryCacheOneResourcePoolsBuilder = ResourcePoolsBuilder.newResourcePoolsBuilder();
+        
+                // Set up heap resources as long as not disk-only
+                if (!cacheType.equalsIgnoreCase(CacheEnabledConfig.DISK)) {
+                    generalRepositoryCacheResourcePoolsBuilder = generalRepositoryCacheResourcePoolsBuilder.heap(generalRepositoryCacheMaxMegaBytes, MemoryUnit.MB);
+                    staticRepositoryCacheOneResourcePoolsBuilder = staticRepositoryCacheOneResourcePoolsBuilder.heap(staticRepositoryCacheOneMaxMegaBytes, MemoryUnit.MB);
+                }
+                // Set up disk resources as long as not heap-only
+                // will default to using /tmp -- let Ehcache throw exception if persistence path is invalid (locked or otherwise)
+                if (!cacheType.equalsIgnoreCase(CacheEnabledConfig.HEAP)) {
+                    generalRepositoryCacheResourcePoolsBuilder = generalRepositoryCacheResourcePoolsBuilder.disk(generalRepositoryCacheMaxMegaBytesLocalDisk, MemoryUnit.MB);
+                    staticRepositoryCacheOneResourcePoolsBuilder = staticRepositoryCacheOneResourcePoolsBuilder.disk(staticRepositoryCacheOneMaxMegaBytesLocalDisk, MemoryUnit.MB);
                 }
 
                 CacheConfiguration<Object, Object> generalRepositoryCacheConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", Object.class, Object.class, generalRepositoryCacheResourcePoolsBuilder).withSizeOfMaxObjectGraph(Long.MAX_VALUE).withSizeOfMaxObjectSize(Long.MAX_VALUE, MemoryUnit.B).build();
@@ -113,10 +116,13 @@ public class CustomEhCachingProvider extends EhcacheCachingProvider {
                 caches.put("StaticRepositoryCacheOne", staticRepositoryCacheOneConfiguration);
 
                 Configuration configuration = null;
-                if (persistenceFile != null && persistenceFile.exists()) {
-                    configuration = new DefaultConfiguration(caches, this.getDefaultClassLoader(), new DefaultPersistenceConfiguration(persistenceFile));
-                } else {
+
+                // provide a persistence configuration for non heap-only caches
+                if (cacheType.equalsIgnoreCase(CacheEnabledConfig.HEAP)) {
                     configuration = new DefaultConfiguration(caches, this.getDefaultClassLoader());
+                } else {
+                    File persistenceFile = new File(persistencePath);
+                    configuration = new DefaultConfiguration(caches, this.getDefaultClassLoader(), new DefaultPersistenceConfiguration(persistenceFile));
                 }
 
                 toReturn = this.getCacheManager(this.getDefaultURI(), configuration);
