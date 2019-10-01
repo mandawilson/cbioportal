@@ -107,8 +107,16 @@ public class CustomEhCachingProvider extends EhcacheCachingProvider {
                     staticRepositoryCacheOneResourcePoolsBuilder = staticRepositoryCacheOneResourcePoolsBuilder.disk(staticRepositoryCacheOneMaxMegaBytesLocalDisk, MemoryUnit.MB);
                 }
 
-                CacheConfiguration<Object, Object> generalRepositoryCacheConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", Object.class, Object.class, generalRepositoryCacheResourcePoolsBuilder).withSizeOfMaxObjectGraph(Long.MAX_VALUE).withSizeOfMaxObjectSize(Long.MAX_VALUE, MemoryUnit.B).build();
-                CacheConfiguration<Object, Object> staticRepositoryCacheOneConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", Object.class, Object.class, staticRepositoryCacheOneResourcePoolsBuilder).withSizeOfMaxObjectGraph(Long.MAX_VALUE).withSizeOfMaxObjectSize(Long.MAX_VALUE, MemoryUnit.B).build();
+                CacheConfiguration<Object, Object> generalRepositoryCacheConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", 
+                        Object.class, Object.class, generalRepositoryCacheResourcePoolsBuilder)
+                    .withSizeOfMaxObjectGraph(Long.MAX_VALUE)
+                    .withSizeOfMaxObjectSize(Long.MAX_VALUE, MemoryUnit.B)
+                    .build();
+                CacheConfiguration<Object, Object> staticRepositoryCacheOneConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", 
+                        Object.class, Object.class, staticRepositoryCacheOneResourcePoolsBuilder)
+                    .withSizeOfMaxObjectGraph(Long.MAX_VALUE)
+                    .withSizeOfMaxObjectSize(Long.MAX_VALUE, MemoryUnit.B)
+                    .build();
 
                 // places caches in a map which will be used to create cache manager
                 Map<String, CacheConfiguration<?, ?>> caches = new HashMap<>();
@@ -116,11 +124,9 @@ public class CustomEhCachingProvider extends EhcacheCachingProvider {
                 caches.put("StaticRepositoryCacheOne", staticRepositoryCacheOneConfiguration);
 
                 Configuration configuration = null;
-
-                // provide a persistence configuration for non heap-only caches
                 if (cacheType.equalsIgnoreCase(CacheEnabledConfig.HEAP)) {
                     configuration = new DefaultConfiguration(caches, this.getDefaultClassLoader());
-                } else {
+                } else { // add persistence configuration if cacheType is either disk-only or hybrid
                     File persistenceFile = new File(persistencePath);
                     configuration = new DefaultConfiguration(caches, this.getDefaultClassLoader(), new DefaultPersistenceConfiguration(persistenceFile));
                 }

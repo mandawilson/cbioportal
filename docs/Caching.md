@@ -7,11 +7,11 @@ The portal is configured to use Ehcache for backend caching. Ehcache supports a 
 ## Creating additional caches
 Cache initialization is handled inside the [CustomEhCachingProvider](../persistence/persistence-api/src/main/java/org/cbioportal/persistence/util/CustomEhCachingProvider.java). The default configuration initializes two seperate caches; however, you may wish to introduce new caches for different datatypes. To create additional caches (e.g creating a cache specifically for clinical data), a new cache must be added to the CustomEhCachingProvider. 
 
-Within the CustomEhCachingProvider, initialize a new `ResourcePoolsBuilder` for the new cache and set the resources accordingly. 
+Within the `CustomEhCachingProvider`, initialize a new `ResourcePoolsBuilder` for the new cache and set the resources accordingly. 
 ```
 ResourcePoolsBuilder clinicalDataCacheResourcePoolsBuilder = ResourcePoolsBuilder.newResourcePoolsBuilder();
-clinicalDataCacheResourcePoolsBuilder.heap(clinicalDataCacheHeapSize, MemoryUnit.MB);
-clinicalDataCacheResourcePoolsBuilder.disk(clinicalDataCacheDiskSize, MemoryUnit.MB);
+clinicalDataCacheResourcePoolsBuilder = clinicalDataCacheResourcePoolsBuilder.heap(clinicalDataCacheHeapSize, MemoryUnit.MB);
+clinicalDataCacheResourcePoolsBuilder = clinicalDataCacheResourcePoolsBuilder.disk(clinicalDataCacheDiskSize, MemoryUnit.MB);
 ```
 After initialzing the `ResourcePoolsBuilder`, create a CacheConfiguration for the new cache using the new `ResourcePoolsBuilder` just created.
 ```
@@ -30,7 +30,7 @@ The `@Cacheable` annotation must also be added (or adjusted) to function declara
 @Cacheable(cacheNames = "ClinicalDataCache", condition = "@cacheEnabledConfig.getEnabled()")
 public String getDataFromClinicalDataRepository(String param) {}
 ```
-Additionally, new properties for setting cache sizes should be added to `portal.properties`. Alternatively, values may also be hardcoded directly into the Ehcache xml configuration file. 
+Additionally, new properties for setting cache sizes should be added to `portal.properties` and loaded into the [CustomEhCachingProvider](../persistence/persistence-api/src/main/java/org/cbioportal/persistence/util/CustomEhCachingProvider.java). Alternatively, values may be hardcoded directly inside [CustomEhCachingProvider](../persistence/persistence-api/src/main/java/org/cbioportal/persistence/util/CustomEhCachingProvider.java).
 
 For more information on cache templates and the Ehcache xml configuration file, refer to the documentation [here](https://www.ehcache.org/documentation/3.7/xml.html). 
 
