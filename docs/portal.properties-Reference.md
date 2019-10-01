@@ -284,12 +284,12 @@ This gene set will add the following in the query box:
 # Ehcache Settings
 cBioPortal is supported on the backend with Ehcache. The configuration, size, and location of these caches are configurable from within portal.properties through the following properties.
 
-Caching is disabled by default. When caching is disabled, no respones will be stored in cache. To turn on caching set `ehcache.cache_enabled` to true.  
+The cache type is set using `ehcache.cache_type`. Valid values are `none`, `heap` (heap-only), `disk` (disk-only), and `hybrid` (disk + heap). By default, `ehcache.cache_type` is set to `none` which disables the cache. When the cache is disabled, no responses will be stored in the cache. 
 ```
-ehcache.cache_enabled=true
+ehcache.cache_type=[none or heap or disk or hybrid]
 ```
 
-When caching is enabled, set a cache configuration using `ehcache.xml_configuration`. This should be the name of an Ehcache xml configuration file; the default provided is `ehcache.xml` which configures a hybrid (disk + heap) cache. To change caching configuration, directly edit `/ehcache.xml`. Alternatively, you can create your own Ehcache xml configuration file, place it under `/persistence/persistence-api/src/main/resources/` and set `ehcache.xml_configuration` to `/[Ehcache xml configuration filename]`.  
+Ehcache initializes caches based off of a template found in an Ehcache xml configuration file. When caching is enabled, set `ehcache.xml_configuration` to the name of the Ehcache xml configuration file. The default provided is `ehcache.xml`; to change the cache template, directly edit this file. Alternatively, you can create your own Ehcache xml configuration file, place it under `/persistence/persistence-api/src/main/resources/` and set `ehcache.xml_configuration` to `/[Ehcache xml configuration filename]`.  
 ```
 ehcache.xml_configuration=
 ```
