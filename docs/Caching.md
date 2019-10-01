@@ -13,7 +13,7 @@ ResourcePoolsBuilder clinicalDataCacheResourcePoolsBuilder = ResourcePoolsBuilde
 clinicalDataCacheResourcePoolsBuilder.heap(clinicalDataCacheHeapSize, MemoryUnit.MB);
 clinicalDataCacheResourcePoolsBuilder.disk(clinicalDataCacheDiskSize, MemoryUnit.MB);
 ```
-After, create a CacheConfiguration for the new cache using the new `ResourcePoolsBuilder` just created.
+After initialzing the `ResourcePoolsBuilder`, create a CacheConfiguration for the new cache using the new `ResourcePoolsBuilder` just created.
 ```
 CacheConfiguration<Object, Object> clinicalDataCacheConfiguration = xmlConfiguration.newCacheConfigurationBuilderFromTemplate("RepositoryCacheTemplate", 
 Object.class, Object.class, clinicalDataCacheResourcePoolsBuilder)
