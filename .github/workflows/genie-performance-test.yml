@@ -16,7 +16,7 @@ jobs:
       # it would be nice to be able to get the exact run URL
       # e.g. https://github.com/$GITHUB_REPOSITORY/runs/$GITHUB_RUN_ID
       # but $GITHUB_RUN_ID does not exist
-      GITHUB_ACTIONS_URL: https://github.com/$GITHUB_REPOSITORY/actions
+      GITHUB_ACTIONS_URL: https://github.com/${{ GITHUB_REPOSITORY }}/actions
       SLACK_CHANNEL: genie-private-github-action-test 
 
     steps:
