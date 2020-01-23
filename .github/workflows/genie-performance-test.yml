@@ -14,5 +14,5 @@ jobs:
     steps:
     - name: GET request to genie private page
       env:
-        genie_private_secret: ${{ secrets.GENIE_PRIVATE_SECRET }}
-      run: curl -I -H "Authorization: Bearer $genie_private_secret" "https://genie.cbioportal.org/api/studies/genie_public" -H "accept: application/json" | head -1 | cut -d" " -f2
+        GENIE_PRIVATE_SECRET: ${{ secrets.GENIE_PRIVATE_SECRET }}
+      run: curl -I -H "Authorization:Bearer $GENIE_PRIVATE_SECRET" "https://genie.cbioportal.org/api/studies/genie_public" -H "accept: application/json" | head -1 | cut -d" " -f2
