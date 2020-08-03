@@ -380,7 +380,8 @@
                         <b:bean class="org.springframework.security.saml.metadata.ExtendedMetadata">
                         </b:bean>
                     </b:constructor-arg>
-                    <b:property name="metadataTrustCheck" value="false"/>
+                    <b:property name="metadataTrustCheck" value="true"/>
+                    <b:property name="metadataRequireSignature" value="false"/>
                 </b:bean>
             </b:list>
         </b:constructor-arg>
@@ -392,7 +393,10 @@
         <b:property name="userDetails" ref="customUserService" />
     </b:bean>
 
-    <b:bean id="customUserService" class="${saml.custom.userservice.class}">
+
+<!--    <b:bean id="customUserService" class="${saml.custom.userservice.class}">
+    </b:bean>-->
+    <b:bean id="customUserService" class="org.cbioportal.security.spring.authentication.keycloak.SAMLUserDetailsServiceImpl">
     </b:bean>
 
     <!-- Provider of default SAML Context -->
@@ -413,8 +417,16 @@
     </b:bean>
 
     <!-- Logout handler terminating local session -->
-    <b:bean id="logoutHandler" class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
+<!--    <b:bean id="logoutHandler" class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
         <b:property name="invalidateHttpSession" value="true"/>
+    </b:bean>-->
+    <b:bean id = "keycloakConfigResolver" class="org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver ">
+    </b:bean>
+    <b:bean id="logoutHandler" class="org.cbioportal.security.spring.authentication.keycloak.CustomKeycloakLogoutHandler">
+        <b:constructor-arg>
+            <b:bean class="org.keycloak.adapters.AdapterDeploymentContext">
+            </b:bean>
+        </b:constructor-arg>
     </b:bean>
 
     <!-- Override default logout processing filter with the one processing SAML messages -->
