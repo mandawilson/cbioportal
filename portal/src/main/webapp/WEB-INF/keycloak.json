@@ -1,0 +1,7 @@
+{
+  "realm" : "htan",
+  "resource" : "cbioportal-htan",
+  "auth-server-url" : "https://keycloak.cbioportal.org/auth",
+  "ssl-required" : "all",
+  "truststore" : "${cbioportal-saml-keystore.jks}"
+}

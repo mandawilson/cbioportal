@@ -402,16 +402,25 @@
         <b:property name="authenticationFailureHandler" ref="failureRedirectHandler"/>
     </b:bean>
 
-    <!-- Logout handler terminating local session -->
+    <b:bean id="adapterDeploymentContext" class="org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean">
+        <b:constructor-arg value="/WEB-INF/keycloak.json" />
+    </b:bean>
+
+    <!-- keycloak handler for terminating local session -->
+    <b:bean id="keycloakLogoutHandler" class="org.keycloak.adapters.springsecurity.authentication.KeycloakLogoutHandler">
+        <b:constructor-arg ref="adapterDeploymentContext" />
+    </b:bean>
+
+    <!-- Logout handler terminating global session -->
     <b:bean id="logoutHandler" class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
         <b:property name="invalidateHttpSession" value="true"/>
     </b:bean>
 
     <!-- Override default logout processing filter with the one processing SAML messages -->
     <b:bean id="samlLogoutFilter" class="org.springframework.security.saml.SAMLLogoutFilter">
-        <b:constructor-arg index="0" ref="successLogoutHandler"/>
-        <b:constructor-arg index="1" ref="logoutHandler"/>
-        <b:constructor-arg index="2" ref="logoutHandler"/>
+        <b:constructor-arg index="0" ref="successLogoutHandler"/><!-- success handler -->
+        <b:constructor-arg index="1" ref="keycloakLogoutHandler"/><!-- local handler -->
+        <b:constructor-arg index="2" ref="logoutHandler"/><!-- global handler -->
     </b:bean>
 
     <!-- Filter processing incoming logout messages -->
