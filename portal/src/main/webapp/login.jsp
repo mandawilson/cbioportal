@@ -50,11 +50,14 @@
     String[] authenticationMethods = authenticationMethod.split(",");
     Boolean showGoogleLogin = false;
     Boolean showMicrosoftLogin = false;
+    Boolean showOauth2Login = false;
     for(String authMethod : authenticationMethod.split(",")) {
         if(authMethod.equals("googleplus") || authMethod.equals("social_auth") || authMethod.equals("social_auth_google")) {
             showGoogleLogin = true;
         } else if(authMethod.equals("social_auth_microsoft")) {
             showMicrosoftLogin = true;
+        } else if(authMethod.equals("oauth2")) {
+            showOauth2Login = true;
         }
     }
     if (authenticationMethod.equals("openid")) {
@@ -176,6 +179,12 @@
                         <!-- we need alt != "Google+" because otherwise it gets hidden by Ad Block Plus chrome plugin -->
                       <IMG alt="cBioPortal Google+ Log-in" src="images/login/googleplus_signin.png"  />
                     </button>
+                  </p>
+                </div>
+
+                <% } else if (showOauth2Login) { %>
+                  <p>
+                    <a href="/oauth2/authorization/okta">Okta</a>
                   </p>
                 </div>
 

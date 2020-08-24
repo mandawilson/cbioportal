@@ -17,6 +17,7 @@
             "openid"        - authentication required (provided by google, yahoo, or myopenid).
                             - note : some/all of these openid providers are no longer providing openid authentication services
             "saml"          - authentication required (provided by a saml SSO authentication server).
+            "oauth2"        - authentication required (provided by a oidc authentication server).
             "ad"            - authentication required (provided by an active directory domain controller).
             "ldap"          - authentication required (provided by an ldap directory server).
             "false"         - no authentication occurs when connecting to the portal
@@ -49,7 +50,7 @@
     <!-- End of Data Access Tokens beans -->
 
     <!-- beans shared across any authentication system -->
-    <b:beans profile="googleplus,openid,saml,ad,ldap">
+    <b:beans profile="googleplus,openid,saml,ad,ldap,oauth2">
         <b:bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
            <b:property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
            <b:property name="searchSystemEnvironment" value="true" />
@@ -511,6 +512,44 @@
 
     <!-- end saml beans -->
     </b:beans>
+
+    <!-- oauth2 beans -->
+    <b:beans profile="oauth2">
+        <b:bean id="authorizedClientService"
+                class="org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService"
+                autowire="constructor"/>
+
+        <b:bean id="authorizedClientRepository"
+                class="org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository">
+            <b:constructor-arg ref="authorizedClientService"/>
+        </b:bean>
+
+        <b:bean id="userAuthoritiesMapper" class="org.cbioportal.security.spring.authentication.oidc.PortalGrantedAuthoritiesMapper"/>
+
+        <http auto-config="true">
+            <oauth2-login authorized-client-repository-ref="authorizedClientRepository"
+                          login-page="/login.jsp"
+                          login-processing-url="/login/oauth2/code/okta"
+                          authentication-success-handler-ref="successRedirectHandler"
+                          user-authorities-mapper-ref="userAuthoritiesMapper"/>
+            <!--oauth2-client>
+
+            </oauth2-client-->
+        </http>
+
+    
+        <client-registrations>
+            <!-- TODO: okta should be a parameter too -->
+            <client-registration registration-id="okta"
+                                 client-id=""
+                                 client-secret=""
+                                 provider-id="okta"/>
+            <provider provider-id="okta"
+                      issuer-uri="https://dev-741308.okta.com/oauth2/default"/><!-- TODO fix -->
+        </client-registrations>
+
+    </b:beans>
+    <!-- end oauth2 beans -->
 
     <!-- authenticate with Active Directory -->
     <b:beans profile="ad">
