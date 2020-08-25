@@ -22,8 +22,7 @@ class PortalGrantedAuthoritiesMapper implements GrantedAuthoritiesMapper {
     public Set<GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
         LOGGER.debug("Mapping authorities...");
         Set<GrantedAuthority> toReturnAuthorities = new HashSet<>();
-        toReturnAuthorities.add(new SimpleGrantedAuthority("ROLE_ALL"));
-        toReturnAuthorities.add(new SimpleGrantedAuthority("ROLE_BLAH"));
+        toReturnAuthorities.add(new SimpleGrantedAuthority("ALL"));
         LOGGER.debug("Done mapping authorities...");
         return toReturnAuthorities;
     }

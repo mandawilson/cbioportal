@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2019 Memorial Sloan-Kettering Cancer Center.
+ * Copyright (c) 2015 - 2020 Memorial Sloan-Kettering Cancer Center.
  *
  * This library is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS
@@ -34,7 +34,8 @@ package org.cbioportal.security.spring;
 
 import java.io.Serializable;
 import java.util.*;
-import org.apache.commons.logging.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.cbioportal.model.*;
 import org.cbioportal.persistence.mybatis.util.CacheMapUtil;
 import org.springframework.beans.factory.annotation.*;
@@ -66,7 +67,7 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
     private static final String TARGET_TYPE_COLLECTION_OF_CANCER_STUDY_IDS = "Collection<CancerStudyId>";
     private static final String TARGET_TYPE_COLLECTION_OF_MOLECULAR_PROFILE_IDS = "Collection<MolecularProfileId>";
     private static final String TARGET_TYPE_COLLECTION_OF_GENETIC_PROFILE_IDS = "Collection<GeneticProfileId>";
-    private static Log log = LogFactory.getLog(CancerStudyPermissionEvaluator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CancerStudyPermissionEvaluator.class);
 
     @Value("${app.name:}")
     private String APP_NAME;
@@ -79,9 +80,7 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
     @Value("${always_show_study_group:}")
     private void setPublicCancerStudiesGroup(String property) {
         PUBLIC_CANCER_STUDIES_GROUP = property;
-        if (log.isDebugEnabled()) {
-            log.debug("setPublicCancerStudiesGroup(), always_show_study_group = " + ((property == null) ? "null" : property));
-        }
+        LOGGER.error("setPublicCancerStudiesGroup(), always_show_study_group = " + ((property == null) ? "null" : property));
         if (property != null && property.trim().isEmpty()) {
             PUBLIC_CANCER_STUDIES_GROUP = null;
         }
@@ -97,24 +96,19 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
      */
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        if (log.isDebugEnabled()) {
-            log.debug("hasPermission(), checking permissions on targetDomainObject");
-        }
+        LOGGER.error("hasPermission(), checking permissions on targetDomainObject");
+        LOGGER.error("hasPermission(), checking permissions on targetDomainObject");
         if (targetDomainObject == null) {
-           if (log.isDebugEnabled()) {
-                log.debug("hasPermission(), targetDomainObject is null, returning false");
-            }
+            LOGGER.error("hasPermission(), targetDomainObject is null, returning false");
             return false;
         }
         CancerStudy cancerStudy = getRelevantCancerStudyFromTarget(targetDomainObject);
-        if (log.isDebugEnabled()) {
             if (cancerStudy == null) {
-                log.debug("hasPermission(), stable cancer study is null.");
+                LOGGER.error("hasPermission(), stable cancer study is null.");
             }
             if (authentication == null) {
-                log.debug("hasPermission(), authentication is null.");
+                LOGGER.error("hasPermission(), authentication is null.");
             }
-        }
         // nothing to do if stable cancer study is null or authentication is null
         // return false as spring-security document specifies
         if (cancerStudy == null || authentication == null) {
@@ -127,6 +121,7 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
         if (user != null) {
             return hasAccessToCancerStudy(authentication, cancerStudy);
         } else {
+            LOGGER.error("hasPermission(), user is null in authentication");
             return false;
         }
     }
@@ -155,13 +150,9 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
      */
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-        if (log.isDebugEnabled()) {
-            log.debug("hasPermission(), checking permissions on targetId");
-        }
+        LOGGER.error("hasPermission(), checking permissions on targetId");
         if (targetId == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("hasPermission(), targetId is null, returning false");
-            }
+            LOGGER.error("hasPermission(), targetId is null, returning false");
             return false;
         }
         if (TARGET_TYPE_CANCER_STUDY_ID.equals(targetType)) {
@@ -177,9 +168,7 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
         } else if (TARGET_TYPE_COLLECTION_OF_SAMPLE_LIST_IDS.equals(targetType)) {
             return hasAccessToSampleLists(authentication, (Collection<String>) targetId, permission);
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("hasPermission(), unknown targetType '" + targetType + "'");
-            }
+            LOGGER.error("hasPermission(), unknown targetType '" + targetType + "'");
         }
         return false;
     }
@@ -210,9 +199,7 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
             return cacheMapUtil.getCancerStudyMap().get(patient.getCancerStudyIdentifier());
         }
         // unable to handle targetDomainObject type
-        if (log.isDebugEnabled()) {
-            log.debug("hasPermission(), targetDomainObject class is '" + targetDomainObject.getClass().getName() + "'");
-        }
+        LOGGER.error("hasPermission(), targetDomainObject class is '" + targetDomainObject.getClass().getName() + "'");
         return null;
     }
 
@@ -226,30 +213,24 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
     private boolean hasAccessToCancerStudy(Authentication authentication, CancerStudy cancerStudy) {
         Set<String> grantedAuthorities = getGrantedAuthorities(authentication);
         String stableStudyID = cancerStudy.getCancerStudyIdentifier();
-        if (log.isDebugEnabled()) {
-            log.debug("hasAccessToCancerStudy(), cancer study stable id: " + stableStudyID);
-            log.debug("hasAccessToCancerStudy(), user: " + authentication.getPrincipal().toString());
+            LOGGER.error("hasAccessToCancerStudy(), cancer study stable id: " + stableStudyID);
+            LOGGER.error("hasAccessToCancerStudy(), user: " + authentication.getPrincipal().toString());
             for (String authority : grantedAuthorities) {
-                log.debug("hasAccessToCancerStudy(), authority: " + authority);
+                LOGGER.error("hasAccessToCancerStudy(), authority: " + authority);
             }
-        }
         // everybody has access the 'all' cancer study
         if (stableStudyID.equalsIgnoreCase(ALL_CANCER_STUDIES_ID)) {
             return true;
         }
         // if a user has access to 'all', simply return true
         if (grantedAuthorities.contains(ALL_CANCER_STUDIES_ID.toUpperCase())) {
-            if (log.isDebugEnabled()) {
-                log.debug("hasAccessToCancerStudy(), user has access to ALL cancer studies, return true");
-            }
+                LOGGER.error("hasAccessToCancerStudy(), user has access to ALL cancer studies, return true");
             return true;
         }
         // if a user has access to 'all_tcga', simply return true for tcga studies
         if (grantedAuthorities.contains(ALL_TCGA_CANCER_STUDIES_ID.toUpperCase()) &&
                 stableStudyID.toUpperCase().endsWith("_TCGA")) {
-            if (log.isDebugEnabled()) {
-                log.debug("hasAccessToCancerStudy(), user has access to ALL_TCGA cancer studies return true");
-            }
+                LOGGER.error("hasAccessToCancerStudy(), user has access to ALL_TCGA cancer studies return true");
             return true;
         }
         // if a user has access to 'all_target', simply return true for target studies
@@ -257,29 +238,23 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
                 (stableStudyID.toUpperCase().endsWith("_TARGET")
                         || stableStudyID.equalsIgnoreCase("ALL_TARGET_PHASE1")
                         || stableStudyID.equalsIgnoreCase("ALL_TARGET_PHASE2"))) {
-            if (log.isDebugEnabled()) {
-                log.debug("hasAccessToCancerStudy(), user has access to ALL_NCI_TARGET cancer studies return true");
-            }
+                LOGGER.error("hasAccessToCancerStudy(), user has access to ALL_NCI_TARGET cancer studies return true");
             return true;
         }
         // check if user is in study groups
         // performance now takes precedence over group accuracy (minimal risk to caching cancer study groups)
         Set<String> groups = new HashSet(Arrays.asList(cancerStudy.getGroups().split(";")));
         if (!Collections.disjoint(groups, grantedAuthorities)) {
-            if (log.isDebugEnabled()) {
-                log.debug("hasAccessToCancerStudy(), user has access by groups return true");
-            }
+                LOGGER.error("hasAccessToCancerStudy(), user has access by groups return true");
             return true;
         }
         // finally, check if the user has this study specifically listed in his 'groups' (a 'group' of this study only)
         boolean toReturn = grantedAuthorities.contains(stableStudyID.toUpperCase());
-        if (log.isDebugEnabled()) {
             if (toReturn == true) {
-                log.debug("hasAccessToCancerStudy(), user has access to this cancer study: '" + stableStudyID.toUpperCase() + "', returning true.");
+                LOGGER.error("hasAccessToCancerStudy(), user has access to this cancer study: '" + stableStudyID.toUpperCase() + "', returning true.");
             } else {
-                log.debug("hasAccessToCancerStudy(), user does not have access to the cancer study: '" + stableStudyID.toUpperCase() + "', returning false.");
+                LOGGER.error("hasAccessToCancerStudy(), user does not have access to the cancer study: '" + stableStudyID.toUpperCase() + "', returning false.");
             }
-        }
         return toReturn;
     }
 
@@ -347,20 +322,22 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
         Set<String> allAuthorities = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
         Set<String> grantedAuthorities = new HashSet<>();
         if (filterGroupsByAppName()) {
+            LOGGER.error("filterGroupsByAppName = true");
             for (String au : allAuthorities) {
+                LOGGER.error("authority: " + au);
                 if (au.toUpperCase().startsWith(appName + ":")) {
                     grantedAuthorities.add(au.substring(appName.length() + 1).toUpperCase());
                 }
             }
         } else {
+            LOGGER.error("filterGroupsByAppName = false");
             for (String au : allAuthorities) {
+                LOGGER.error("authority: " + au);
                 grantedAuthorities.add(au.toUpperCase());
             }
         }
         // all users are allowed access to PUBLIC studies
-        if (log.isDebugEnabled()) {
-            log.debug("PUBLIC_CANCER_STUDIES_GROUP= " + ((PUBLIC_CANCER_STUDIES_GROUP == null) ? "null" : PUBLIC_CANCER_STUDIES_GROUP));
-        }
+            LOGGER.error("PUBLIC_CANCER_STUDIES_GROUP= " + ((PUBLIC_CANCER_STUDIES_GROUP == null) ? "null" : PUBLIC_CANCER_STUDIES_GROUP));
         if (PUBLIC_CANCER_STUDIES_GROUP != null) {
             grantedAuthorities.add(PUBLIC_CANCER_STUDIES_GROUP.toUpperCase());
         }
@@ -368,16 +345,12 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
     }
 
     private String getAppName() {
-        if (log.isDebugEnabled()) {
-            log.debug("getAppName(), APP_NAME = " + ((APP_NAME == null) ? "null" : APP_NAME));
-        }
+            LOGGER.error("getAppName(), APP_NAME = " + ((APP_NAME == null) ? "null" : APP_NAME));
         return (APP_NAME == null || APP_NAME.trim().isEmpty()) ? DEFAULT_APP_NAME : APP_NAME;
     }
 
     private boolean filterGroupsByAppName() {
-        if (log.isDebugEnabled()) {
-            log.debug("filterGroupsByAppName(), FILTER_GROUPS_BY_APP_NAME = " + ((FILTER_GROUPS_BY_APP_NAME == null) ? "null" : FILTER_GROUPS_BY_APP_NAME));
-        }
+        LOGGER.error("filterGroupsByAppName(), FILTER_GROUPS_BY_APP_NAME = " + ((FILTER_GROUPS_BY_APP_NAME == null) ? "null" : FILTER_GROUPS_BY_APP_NAME));
         return FILTER_GROUPS_BY_APP_NAME == null || Boolean.parseBoolean(FILTER_GROUPS_BY_APP_NAME);
     }
 }
