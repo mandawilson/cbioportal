@@ -524,17 +524,43 @@
             <b:constructor-arg ref="authorizedClientService"/>
         </b:bean>
 
-        <b:bean id="userAuthoritiesMapper" class="org.cbioportal.security.spring.authentication.oidc.PortalGrantedAuthoritiesMapper"/>
+        <b:bean id="userAuthoritiesMapper"
+                class="org.cbioportal.security.spring.authentication.oidc.PortalGrantedAuthoritiesMapper"/>
 
-        <http auto-config="true">
+        <!--b:bean id="logoutSuccessHandler"
+                class="org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler">
+            <b:constructor-arg ref="authorizedClientRepository"/>
+            <b:property name="setPostLogoutRedirectUri" value="/login.jsp?logout_success=true"/>
+        </b:bean-->
+
+        <b:bean id="securityContextLogoutHandler" class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+
+        <b:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+            <b:property name="filterProcessesUrl" value="/j_spring_security_logout"/>
+            <b:constructor-arg index="0" value="/login.jsp?logout_success=true"/>
+            <b:constructor-arg index="1">
+                <b:list>
+                    <b:ref bean="securityContextLogoutHandler"/>
+                </b:list>
+            </b:constructor-arg>
+        </b:bean>
+
+        <http>
+            <custom-filter position="LOGOUT_FILTER" ref="logoutFilter"/>
+            <!--logout logout-url="/j_spring_security_logout"
+                    delete-cookies="JSESSIONID"
+                    logout-success-url="/login.jsp?logout_success=true"/-->
+
             <oauth2-login authorized-client-repository-ref="authorizedClientRepository"
                           login-page="/login.jsp"
                           login-processing-url="/login/oauth2/code/okta"
                           authentication-success-handler-ref="successRedirectHandler"
                           user-authorities-mapper-ref="userAuthoritiesMapper"/>
+                    <!--success-handler-ref="logoutSuccessHandler"-->
             <!--oauth2-client>
 
             </oauth2-client-->
+            <csrf disabled="true"/>
         </http>
 
     
@@ -545,6 +571,7 @@
                                  client-secret=""
                                  provider-id="okta"/>
             <provider provider-id="okta"
+                      user-info-user-name-attribute="email"
                       issuer-uri="https://dev-741308.okta.com/oauth2/default"/><!-- TODO fix -->
         </client-registrations>
 

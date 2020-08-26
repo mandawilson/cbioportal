@@ -44,7 +44,8 @@
     else if (authenticationMethod.equals("googleplus") ||
 	    		authenticationMethod.equals("saml") ||
 	    		authenticationMethod.equals("ad") ||
-	    		authenticationMethod.contains("social_auth")) {
+	    		authenticationMethod.contains("social_auth") ||
+                authenticationMethod.contains("oauth2")) {
         principal = "principal.username";
     }
     pageContext.setAttribute("principal", principal);
