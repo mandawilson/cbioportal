@@ -47,17 +47,31 @@ class PortalGrantedAuthoritiesMapper implements GrantedAuthoritiesMapper {
                 OidcIdToken idToken = oidcUserAuthority.getIdToken();
                 OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
 
+                // TODO delete most/all of the logging
                 LOGGER.debug("idToken: " + idToken);
-                LOGGER.debug("userInfo.getEmail(): " + userInfo.getEmail());
-                LOGGER.debug("userInfo.getFullName(): " + userInfo.getFullName());
-                LOGGER.debug("userInfo.getPreferredUsername(): " + userInfo.getPreferredUsername());
-                LOGGER.debug("userInfo.getSubject(): " + userInfo.getSubject());
+                LOGGER.debug("userInfo: " + userInfo);
 
-                email = userInfo.getEmail();
+                if (userInfo != null) {
+                    LOGGER.debug("userInfo.getEmail(): " + userInfo.getEmail());
+                    LOGGER.debug("userInfo.getFullName(): " + userInfo.getFullName());
+                    LOGGER.debug("userInfo.getPreferredUsername(): " + userInfo.getPreferredUsername());
+                    LOGGER.debug("userInfo.getSubject(): " + userInfo.getSubject());
 
-                // Map the claims found in idToken and/or userInfo
-                // to one or more GrantedAuthority's and add it to mappedAuthorities
-
+                    email = userInfo.getEmail();
+                } else if (idToken != null) {
+                    LOGGER.debug("idToken.getTokenValue(): " + idToken.getTokenValue()); 
+                    LOGGER.debug("idToken.getEmail(): " + idToken.getEmail()); 
+                    if (idToken.getEmail() != null) {
+                        email = idToken.getEmail();
+                    }
+                    LOGGER.debug("idToken.getAccessTokenHash(): " + idToken.getAccessTokenHash()); 
+                    // userInfo is null from Synapse
+                    Map<String, Object> tokenClaims = idToken.getClaims();
+                    LOGGER.debug("Printing tokenClaims");
+                    for (Map.Entry<String, Object> entry : tokenClaims.entrySet()) {
+                        LOGGER.debug("Key : " + entry.getKey() + " Value : " + entry.getValue());
+                    }
+                }
             } else if (OAuth2UserAuthority.class.isInstance(authority)) {
                 // TODO this one is not being called, maybe delete or throw error?  or leave?
                 // delete because we aren't actually getting the email
@@ -68,10 +82,6 @@ class PortalGrantedAuthoritiesMapper implements GrantedAuthoritiesMapper {
                 for (Map.Entry<String, Object> entry : userAttributes.entrySet()) {
                     LOGGER.debug("Key : " + entry.getKey() + " Value : " + entry.getValue());
                 }
-
-                // Map the attributes found in userAttributes
-                // to one or more GrantedAuthority's and add it to mappedAuthorities
-
             }
         }
 

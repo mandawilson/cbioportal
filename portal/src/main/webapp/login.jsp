@@ -184,7 +184,7 @@
 
                 <% } else if (showOauth2Login) { %>
                   <p>
-                    <a href="/oauth2/authorization/okta">Okta</a>
+                    <a href="/oauth2/authorization/synapse">Synapse</a>
                   </p>
                 </div>
 

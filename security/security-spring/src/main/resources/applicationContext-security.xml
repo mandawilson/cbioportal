@@ -533,6 +533,12 @@
             <b:property name="setPostLogoutRedirectUri" value="/login.jsp?logout_success=true"/>
         </b:bean-->
 
+        <!-- Handler deciding where to redirect user after failed login -->
+        <b:bean id="failureRedirectHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+            <!--<b:property name="useForward" value="true"/>-->
+            <b:property name="defaultFailureUrl" value="/login.jsp?login_error=true"/>
+        </b:bean>
+
         <b:bean id="securityContextLogoutHandler" class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
 
         <b:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
@@ -553,8 +559,9 @@
 
             <oauth2-login authorized-client-repository-ref="authorizedClientRepository"
                           login-page="/login.jsp"
-                          login-processing-url="/login/oauth2/code/okta"
+                          login-processing-url="/login/oauth2/code/synapse"
                           authentication-success-handler-ref="successRedirectHandler"
+                          authentication-failure-handler-ref="failureRedirectHandler"
                           user-authorities-mapper-ref="userAuthoritiesMapper"/>
                     <!--success-handler-ref="logoutSuccessHandler"-->
             <!--oauth2-client>
@@ -566,13 +573,14 @@
     
         <client-registrations>
             <!-- TODO: okta should be a parameter too -->
-            <client-registration registration-id="okta"
+            <client-registration registration-id="synapse"
                                  client-id=""
                                  client-secret=""
-                                 provider-id="okta"/>
-            <provider provider-id="okta"
+                                 provider-id="synapse"/>
+            <provider provider-id="synapse"
                       user-info-user-name-attribute="email"
-                      issuer-uri="https://dev-741308.okta.com/oauth2/default"/><!-- TODO fix -->
+                      authorization-uri="https://signin.synapse.org?claims=%7B%22id_token%22%3A%7B%22given_name%22%3Anull%2C%22family_name%22%3Anull%2C%22email%22%3Anull%7D%2C%22userinfo%22%3A%7B%22given_name%22%3Anull%2C%22family_name%22%3Anull%2C%22email%22%3Anull%7D%7D"
+                      issuer-uri="https://repo-prod.prod.sagebase.org/auth/v1"/><!-- TODO fix -->
         </client-registrations>
 
     </b:beans>
