@@ -10,7 +10,7 @@ import org.springframework.security.saml.provider.identity.config.SamlIdentityPr
 
 import static org.springframework.security.saml.provider.identity.config.SamlIdentityProviderSecurityDsl.identityProvider;
 
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SecurityConfiguration {
 
 	@Configuration
