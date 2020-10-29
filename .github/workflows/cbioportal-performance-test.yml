@@ -8,12 +8,12 @@ jobs:
     if: github.repository == 'cbioportal/cbioportal'
     runs-on: ubuntu-latest
     steps:
-#      - name: Checkout git repo
-#        uses: actions/checkout@v1
-#      - name: Extract PR number
-#        # create the docker image tag by extracting pr number from github
-#        run: echo "##[set-output name=image_tag;]$(export set GITHUB_REF_TMP=${GITHUB_REF#refs/pull/};echo cbioportal-performance-test-${GITHUB_REF_TMP%/merge})"
-#        id: extract_tags
+      - name: Checkout git repo
+        uses: actions/checkout@v1
+      - name: Extract PR number
+        # create the docker image tag by extracting pr number from github
+        run: echo "##[set-output name=image_tag;]$(export set GITHUB_REF_TMP=${GITHUB_REF#refs/pull/};echo cbioportal-performance-test-${GITHUB_REF_TMP%/merge})"
+        id: extract_tags
 #      - name: Docker build with cache
 #        uses: whoan/docker-build-with-cache-action@v4
 #        with:
