@@ -38,7 +38,7 @@ jobs:
             .github/k8s/cbioportal_performance_test.yaml
           images: 'cbioportalpipelines/cbioportal:${{ steps.extract_tags.outputs.image_tag }}'
           action: deploy
-          kubectl-version: '1.14.0'
+          kubectl-version: 'v1.14.0'
 #      - name: DELETE request to dockerhub
 #        env:
 #          MAX_WAIT_TIME_IN_SECONDS: 300
