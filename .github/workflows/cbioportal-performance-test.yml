@@ -35,7 +35,7 @@ jobs:
         uses: Azure/k8s-deploy@v1.2
         with:
           manifests: |
-            .github/k8s/cbioportal_performance_test.yaml
+            k8s/cbioportal_performance_test.yaml
           images: 'cbioportalpipelines/cbioportal:${{ steps.extract_tags.outputs.image_tag }}'
           action: deploy
           kubectl-version: 'v1.14.0'
