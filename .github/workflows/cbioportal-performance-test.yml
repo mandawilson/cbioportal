@@ -34,6 +34,9 @@ jobs:
       - name: show dir
         run: |
           echo `pwd`
+      - name: show content
+        run: |
+          echo `ls -a`
       - name: Deploy to kubernetes
         uses: Azure/k8s-deploy@v1.2
         with:
