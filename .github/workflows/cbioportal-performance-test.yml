@@ -27,9 +27,11 @@ jobs:
       - name: Set context for kubectl cluster
         uses: azure/k8s-set-context@v1
         with:
-          method: service-account
-          k8s-url: ${{ secrets.K8S_URL }}
-          k8s-secret: ${{ secrets.K8S_SECRET }}
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          #method: service-account
+          #k8s-url: ${{ secrets.K8S_URL }}
+          #k8s-secret: ${{ secrets.K8S_SECRET }}
         id: setcontext
       - name: show dir
         run: |
